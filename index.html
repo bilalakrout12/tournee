@@ -669,7 +669,7 @@ function armed(btn, label = 'Confirmer') {
 async function copy(text) { try { await navigator.clipboard.writeText(text); toast('Copié'); } catch { toast('Copie impossible ici : sélectionne le texte.', true); } }
 
 /* ---------- Stockage local (IndexedDB) ---------- */
-const APP_VERSION = '1.0';
+const APP_VERSION = '1.1';
 const LocalDB = (() => {
   const NAME = 'tournee-piscines';
   let idb = null;
@@ -778,6 +778,44 @@ const blobToB64 = blob => new Promise((res, rej) => { const r = new FileReader()
 const fmtBytes = b => b >= 1048576 ? `${nf(b / 1048576, 1)} Mo` : `${nf(b / 1024, 0)} Ko`;
 const daysSince = iso => iso ? Math.floor((Date.now() - new Date(iso).getTime()) / 864e5) : null;
 function backupAge() { const d = daysSince(settings().lastBackup); return d == null ? 'jamais' : d === 0 ? 'aujourd’hui' : d === 1 ? 'hier' : `il y a ${d} jours`; }
+const normName = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const NAME_STOP = new Set(['m', 'mme', 'mr', 'mlle', 'et', 'monsieur', 'madame', 'succession', 'indivision', 'sasu', 'sarl', 'sas', 'sci', 'de', 'du', 'la', 'le', 'les', 'des']);
+const nameTokens = s => normName(s).split(' ').filter(t => t.length >= 4 && !NAME_STOP.has(t));
+const streetNo = a => { const m = String(a || '').match(/(?:^|[\s,])(\d{1,4})(?:\s*(?:bis|ter|[a-z]))?(?=[\s,])/i); return m ? m[1] : ''; };
+function renderClientImport(obj, box) {
+  const existing = Object.values(S.pools);
+  const match = c => {
+    const ct = nameTokens(c.name), cn = streetNo(c.address);
+    for (const p of existing) {
+      if ((c.ref && p.ardoiseRef === c.ref) || (normName(p.name) && normName(p.name) === normName(c.name))) return { p, same: true };
+      const shared = nameTokens(p.name).some(t => ct.includes(t));
+      if (shared && cn && cn === streetNo(p.address)) return { p, same: true };
+      if (shared) return { p, same: false };
+    }
+    return null;
+  };
+  const list = obj.clients.map((c, i) => ({ c, i, d: match(c) }));
+  const row = ({ c, i, d }) => `<label class="check" style="align-items:flex-start;border-top:1px solid var(--line);padding-top:8px"><input type="checkbox" data-ci="${i}" ${c.poolHint && !(d && d.same) ? 'checked' : ''}><span style="display:grid;gap:2px"><b>${esc(c.name)}</b><span class="muted sm">${esc([c.address || 'Pas d’adresse', c.price ? eur(c.price) + ' le passage' : '', c.gps ? (c.gpsPrecision === 'rue' ? 'GPS sur la rue' : 'GPS trouvé') : 'Sans GPS'].filter(Boolean).join(' · '))}</span>${d && d.same ? `<span class="badge warn" style="justify-self:start">Déjà dans Tournée : ${esc(d.p.name)}</span>` : d ? `<span class="badge" style="justify-self:start">Même nom que ${esc(d.p.name)}, autre adresse</span>` : c.poolHint ? `<span class="badge ok" style="justify-self:start">Facturé pour de la piscine${c.sample ? ' : ' + esc(c.sample) : ''}</span>` : `<span class="badge" style="justify-self:start">Aucune facture piscine trouvée</span>`}</span></label>`;
+  const pool = list.filter(x => x.c.poolHint), other = list.filter(x => !x.c.poolHint);
+  box.innerHTML = `<div class="result"><span>Clients ${esc(obj.source || '')}</span><b>${obj.clients.length} client${obj.clients.length > 1 ? 's' : ''}</b><small>${pool.length} repéré${pool.length > 1 ? 's' : ''} comme client${pool.length > 1 ? 's' : ''} piscine${pool.length ? ', coché' + (pool.length > 1 ? 's' : '') + ' par défaut' : ''}</small></div>
+    <div style="display:grid;gap:8px;margin-top:10px">${pool.map(row).join('')}${other.length ? `<p class="hint" style="margin-top:6px">Autres clients (photo, etc.) : coche seulement ceux qui ont une piscine.</p>${other.map(row).join('')}` : ''}</div>
+    <p class="hint" style="margin-top:8px">Les fiches sont ajoutées sans toucher aux données existantes, avec « Aucun passage » tant que tu n’as pas complété volume, traitement et fréquence.</p>
+    <button type="button" class="btn primary" data-v="import-clients" style="margin-top:10px">Ajouter les clients cochés</button>`;
+  box.onclick = async e => {
+    const b = e.target.closest('[data-v="import-clients"]'); if (!b) return;
+    const picked = $$('input[data-ci]:checked', box).map(x => obj.clients[+x.dataset.ci]);
+    if (!picked.length) { toast('Coche au moins un client.', true); return; }
+    b.disabled = true; b.textContent = 'Ajout…';
+    const now = Date.now();
+    const ok = await run(picked.map((c, k) => put('pools', uid(), {
+      active: true, name: c.name, address: c.address || '', phone: c.phone || '', email: c.email || '', gps: c.gps || null,
+      price: c.price ?? null, volume: null, dims: {}, filtration: '', coverage: '', treatment: '', elecUnit: '%',
+      freqByMonth: Array(12).fill(0), monthWeek: 1, parity: 0, prefDays: [], duration: 40, access: {}, equipment: [], photoId: null,
+      notes: c.notes || (c.code ? `Code client Ardoise : ${c.code}` : ''), ardoiseRef: c.ref || null, incomplete: true, createdAt: now + k
+    })), `${picked.length} fiche${picked.length > 1 ? 's' : ''} ajoutée${picked.length > 1 ? 's' : ''}`);
+    if (ok) { closeSheet(); UI.poolId = null; setTab('piscines'); } else { b.disabled = false; b.textContent = 'Ajouter les clients cochés'; }
+  };
+}
 function openBackup() {
   const el = openSheet({
     title: 'Sauvegarde',
@@ -790,7 +828,7 @@ function openBackup() {
         <div id="bk-ready"></div>
       </fieldset>
       <fieldset><legend>Restaurer une sauvegarde</legend>
-        <p class="hint">Remplace toutes les données de ce téléphone par celles du fichier.</p>
+        <p class="hint">Une sauvegarde remplace toutes les données de ce téléphone. Un fichier de clients Ardoise, lui, ajoute des fiches sans rien effacer.</p>
         <input type="file" id="bk-file" accept=".json,application/json" hidden>
         <button type="button" class="btn" data-v="pick" style="justify-self:start">Choisir un fichier de sauvegarde</button>
         <div id="bk-import"></div>
@@ -827,6 +865,7 @@ function openBackup() {
     const box = $('#bk-import', el);
     try {
       const obj = JSON.parse(await file.text());
+      if (obj && obj.app === 'tournee-piscines' && obj.kind === 'clients' && Array.isArray(obj.clients)) { incoming = null; renderClientImport(obj, box); return; }
       if (!obj || obj.app !== 'tournee-piscines' || !obj.docs) throw new Error('Ce fichier n’est pas une sauvegarde de Tournée.');
       incoming = obj;
       const n = pre => Object.keys(obj.docs).filter(k => k.startsWith(pre + '/')).length;
@@ -880,7 +919,7 @@ function render() {
   dirty = false;
   const sync = $('#sync');
   sync.className = 'sync ' + (S.error ? 'bad' : S.synced ? 'ok' : '');
-  sync.textContent = S.error ? 'Erreur de stockage' : (navigator.onLine === false ? 'Hors ligne · local' : 'Enregistré sur ce téléphone');
+  sync.textContent = S.error ? 'Erreur' : (navigator.onLine === false ? 'Hors ligne' : 'Local');
   $('#tabname').textContent = TABS[UI.tab];
   $$('.tabs button').forEach(b => b.setAttribute('aria-current', b.dataset.tab === UI.tab ? 'page' : 'false'));
   const nc = openNeeds().length, cnt = $('#needcount'); cnt.hidden = !nc; cnt.textContent = nc;
@@ -1475,7 +1514,7 @@ function poolCard(p) {
       <span class="muted">${esc([town(p.address), p.volume ? nf(p.volume, 0) + ' m³' : '', TRT_SHORT[p.treatment], freqLabel(f)].filter(Boolean).join(' · '))}</span>
       <span class="muted sm">${last ? `Dernier passage : ${shortDate(last.date)}` : 'Aucun passage enregistré'}</span>
       ${last ? valueChips(last) : ''}
-      <span class="badges">${p.pendingNote && p.pendingNote.text ? '<span class="badge warn">Rappel en cours</span>' : ''}${eqWarn ? '<span class="badge warn">Matériel à prévoir</span>' : ''}${!p.gps ? '<span class="badge">Sans GPS</span>' : ''}</span>
+      <span class="badges">${p.incomplete || !p.volume ? '<span class="badge bad">Fiche à compléter</span>' : ''}${p.pendingNote && p.pendingNote.text ? '<span class="badge warn">Rappel en cours</span>' : ''}${eqWarn ? '<span class="badge warn">Matériel à prévoir</span>' : ''}${!p.gps ? '<span class="badge">Sans GPS</span>' : ''}</span>
     </span></button>`;
 }
 function poolListHtml() {
@@ -1530,6 +1569,7 @@ function viewPool(id) {
         <div class="row-actions"><button class="btn primary" data-action="pool-visit" data-id="${id}">Saisir un passage</button><button class="btn" data-action="calc" data-id="${id}">Calculatrice produits</button><button class="btn ghost" data-action="edit-pool" data-id="${id}">Modifier</button>${navUrl ? `<a class="btn ghost" href="${esc(navUrl)}" target="_blank" rel="noopener">Itinéraire (Plans)</a>` : ''}</div>
       </div>
     </div>
+    ${p.incomplete || !p.volume ? `<div class="callout bad"><b>Fiche à compléter</b><p>Renseigne le volume, la filtration, le traitement, la fréquence mois par mois${p.gps ? '' : ' et les coordonnées GPS'} : tant que c’est vide, ce client n’apparaît pas dans « Remplir la semaine ».</p><button class="btn sm" data-action="edit-pool" data-id="${id}" style="justify-self:start">Compléter la fiche</button></div>` : ''}
     ${p.pendingNote && p.pendingNote.text ? `<div class="callout"><b>À prévoir au prochain passage${nxt ? ` (${dayLabel(nxt.date, true)})` : ''}</b><p>${esc(p.pendingNote.text)}</p></div>` : ''}
     <div class="fiche-grid">
       <section class="card"><h2>Bassin</h2><dl class="facts">
@@ -1671,7 +1711,7 @@ function openPoolForm(id) {
         equipment: state.equipment.map(e => ({ type: e.type, model: (e.model || '').trim(), installed: e.installed || '', life: L.num(e.life) })),
         photoId: state.photoId, notes: v('notes')
       };
-      delete doc.id; delete doc.freqSeason; delete doc.freqOff;
+      delete doc.id; delete doc.freqSeason; delete doc.freqOff; delete doc.incomplete;
       const pid = id || uid();
       const rs = $('#freq-reset', el), reset = rs && !rs.hidden && f.elements.freqReset.checked;
       const ops = [put('pools', pid, doc), ...(reset ? futureStops.map(s => del('stops', s.id)) : [])];

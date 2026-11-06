@@ -1,6 +1,6 @@
 /* Tournée Piscines : fonctionnement hors ligne.
    Change VERSION à chaque mise en ligne d'une nouvelle version de l'appli. */
-const VERSION = 'tournee-v1.0';
+const VERSION = 'tournee-v1.1';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
