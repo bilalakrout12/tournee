@@ -1,0 +1,2095 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tournée Piscines</title>
+<meta name="theme-color" content="#0B6D88">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tournée">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Layout: outil de terrain, une colonne au téléphone (en-tête collant, cartes de passage, barre d'onglets en bas) ; sur grand écran la semaine s'ouvre en colonnes */
+:root{
+  --bg:#EDF2F3; --surface:#FFFFFF; --surface-2:#E2EAEC; --line:#CCD8DB; --fg:#0F2229; --muted:#536770;
+  --accent:#0B6D88; --accent-fg:#FFFFFF; --accent-soft:#D3EAF1;
+  --ok:#1B7647; --ok-soft:#DBEFE3; --warn:#94570A; --warn-soft:#FAE9CC; --bad:#B0281F; --bad-soft:#F9DEDA;
+  --scrim:rgba(6,20,26,.52); --shadow:0 1px 2px rgba(15,34,41,.06),0 8px 24px rgba(15,34,41,.10);
+  --f-display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r:12px; --tabh:62px; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0A161B; --surface:#112229; --surface-2:#182E36; --line:#27414B; --fg:#E3EEF1; --muted:#93A9B2;
+  --accent:#4CB5D2; --accent-fg:#04212A; --accent-soft:#103A47;
+  --ok:#51C68B; --ok-soft:#113626; --warn:#EFA640; --warn-soft:#3A2A0F; --bad:#F27A6F; --bad-soft:#3F1814;
+  --scrim:rgba(0,0,0,.6); --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0A161B; --surface:#112229; --surface-2:#182E36; --line:#27414B; --fg:#E3EEF1; --muted:#93A9B2;
+  --accent:#4CB5D2; --accent-fg:#04212A; --accent-soft:#103A47;
+  --ok:#51C68B; --ok-soft:#113626; --warn:#EFA640; --warn-soft:#3A2A0F; --bad:#F27A6F; --bad-soft:#3F1814;
+  --scrim:rgba(0,0,0,.6); --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); color-scheme:dark }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+img{max-width:100%}
+img[data-blob]{background:var(--surface-2)}
+html{-webkit-tap-highlight-color:transparent}
+html.locked, html.locked body{overflow:hidden}
+body{margin:0;padding-top:env(safe-area-inset-top,0px);background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.4;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;line-height:1.1;margin:0;text-wrap:balance;letter-spacing:.005em}
+h1{font-size:1.75rem} h2{font-size:1.25rem} h3{font-size:1.1rem}
+p{margin:0}
+small{font-size:.8em}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1440px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.muted{color:var(--muted)} .sm{font-size:.86rem}
+.num{font-variant-numeric:tabular-nums}
+
+/* En-tête */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{width:30px;height:30px;border-radius:8px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;flex:none}
+.brand-name{font-family:var(--f-display);font-weight:700;font-size:1.15rem;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap}
+.brand-tab{color:var(--muted);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted);white-space:nowrap}
+.sync::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.sync.ok::before{background:var(--ok)} .sync.bad::before{background:var(--bad)}
+
+main{padding-block:16px calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 28px)}
+main > .wrap{display:grid;gap:16px}
+
+/* Onglets */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs .wrap{display:grid;grid-template-columns:repeat(5,1fr);max-width:720px}
+.tabs button{appearance:none;border:0;background:none;height:var(--tabh);display:grid;place-items:center;align-content:center;gap:2px;color:var(--muted);font-size:.74rem;font-weight:600;letter-spacing:.02em;cursor:pointer;position:relative}
+.tabs button[aria-current="page"]{color:var(--accent)}
+.tabs button[aria-current="page"]::after{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
+.tabs .count{position:absolute;top:8px;left:calc(50% + 8px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font-size:.7rem;display:grid;place-items:center}
+
+/* Boutons */
+.btn{appearance:none;border:1px solid transparent;background:var(--surface-2);color:var(--fg);min-height:44px;padding:0 16px;border-radius:10px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;white-space:nowrap}
+.btn:hover{filter:brightness(.97)}
+.btn.primary{background:var(--accent);color:var(--accent-fg)}
+.btn.ghost{background:transparent;border-color:var(--line)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:.9rem}
+.btn.block{width:100%}
+.btn.danger{color:var(--bad)}
+.btn.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.icon-btn{appearance:none;border:0;background:transparent;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;cursor:pointer;color:var(--fg);flex:none}
+.icon-btn:hover{background:var(--surface-2)}
+.row-actions{display:flex;flex-wrap:wrap;gap:8px}
+
+/* Planning */
+.weekbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.weeknav{display:flex;align-items:center;gap:4px}
+.weektitle{display:grid;line-height:1.15;min-width:0}
+.weektitle strong{font-family:var(--f-display);font-size:1.35rem}
+.weektitle span{color:var(--muted);font-size:.9rem}
+.weekactions{display:flex;gap:8px;flex-wrap:wrap}
+.daystrip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.daychip{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 0 4px;display:grid;justify-items:center;gap:0;cursor:pointer;min-width:0}
+.daychip span{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.daychip b{font-family:var(--f-display);font-size:1.3rem;line-height:1.1}
+.daychip i{font-style:normal;font-size:.75rem;color:var(--muted);min-height:1em}
+.daychip.today b{color:var(--accent)}
+.daychip.sel{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.daychip.sel span,.daychip.sel i,.daychip.sel b{color:var(--accent-fg)}
+.daychip.drop,.daylist.drop{outline:2px dashed var(--accent);outline-offset:2px}
+.weekgrid{display:grid;grid-template-columns:repeat(var(--cols,6),minmax(0,1fr));gap:12px;align-items:start}
+.day{display:grid;gap:10px;min-width:0}
+.dayhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:8px}
+.dayhead h3 .tag{font-family:var(--f-body);font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;background:var(--accent-soft);color:var(--accent);padding:2px 6px;border-radius:6px;vertical-align:middle}
+.dayhead p{font-size:.86rem;color:var(--muted)}
+.dayact{display:flex;gap:6px;flex-wrap:wrap}
+.weekgrid .dayact .btn{flex:1}
+.daylist{display:grid;gap:0;min-height:72px;border-radius:var(--r)}
+.daylist .empty{border:1px dashed var(--line);border-radius:var(--r);padding:16px;color:var(--muted);font-size:.9rem;text-align:center}
+.conn{display:flex;align-items:center;gap:6px;padding:5px 0 5px 14px;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.conn svg{width:16px;height:16px}
+.stop{display:flex;align-items:stretch;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-width:0}
+.stop+.stop{margin-top:8px}
+.stop.prio{border-color:var(--bad)}
+.stop.done{background:var(--surface-2)}
+.stop.done strong{color:var(--muted)}
+.stop.dragging{opacity:.3}
+.stop.drop-before{box-shadow:0 -3px 0 var(--accent)}
+.stop.drop-after{box-shadow:0 3px 0 var(--accent)}
+.handle{appearance:none;border:0;background:transparent;width:38px;flex:none;display:grid;place-items:center;color:var(--muted);cursor:grab;touch-action:none;border-radius:var(--r) 0 0 var(--r)}
+.handle:active{cursor:grabbing}
+.stop-main{appearance:none;border:0;background:transparent;text-align:left;padding:10px 12px 10px 0;flex:1;min-width:0;display:grid;gap:4px;cursor:pointer;color:inherit}
+.stop-top{display:flex;align-items:baseline;gap:8px;min-width:0}
+.stop-top strong{font-size:1.02rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.eta{font-family:var(--f-display);font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;flex:none}
+.stop-sub{font-size:.84rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.note{display:block;font-size:.84rem;background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:4px 8px}
+.ghost-card{position:fixed;pointer-events:none;z-index:70;box-shadow:var(--shadow);transform:rotate(1.2deg);opacity:.95}
+.reminders{background:var(--warn-soft);color:var(--warn);border-radius:var(--r);padding:12px 14px;display:grid;gap:6px}
+.reminders ul{margin:0;padding-left:18px;display:grid;gap:2px}
+.reminders h3{font-size:1rem}
+
+/* Badges et pastilles */
+.badges,.chips{display:flex;flex-wrap:wrap;gap:5px}
+.badge,.chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-size:.78rem;font-weight:600;background:var(--surface-2);color:var(--fg);white-space:nowrap;font-variant-numeric:tabular-nums}
+.stop.done .chip,.stop.done .badge{background:var(--surface)}
+.badge.ok,.chip.s-ok{background:var(--ok-soft);color:var(--ok)}
+.badge.warn,.chip.s-warn{background:var(--warn-soft);color:var(--warn)}
+.badge.prio,.badge.bad,.chip.s-bad{background:var(--bad-soft);color:var(--bad)}
+.chip small{font-weight:500;opacity:.8}
+.sw{display:inline-block;width:11px;height:11px;border-radius:50%;box-shadow:0 0 0 1px var(--line);flex:none}
+
+/* Cartes génériques */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:12px;min-width:0}
+.card h2{font-size:1.1rem;text-transform:uppercase;letter-spacing:.04em}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 16px;margin:0}
+.facts div{display:grid;gap:2px;min-width:0}
+.facts dt{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.facts dd{margin:0;font-weight:500;overflow-wrap:anywhere}
+.empty-state{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:28px 20px;display:grid;gap:10px;justify-items:start}
+.empty-state h2{font-size:1.3rem}
+.empty-state p{color:var(--muted);max-width:60ch}
+.loading{padding:40px 0;color:var(--muted)}
+.banner{background:var(--bad-soft);color:var(--bad);border-radius:var(--r);padding:12px 14px}
+
+/* Piscines */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toolbar input{flex:1;min-width:180px}
+.plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+.pcard{appearance:none;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:10px;display:flex;gap:12px;cursor:pointer;color:inherit;min-width:0}
+.pcard img,.pthumb{width:72px;height:72px;border-radius:9px;object-fit:cover;flex:none;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.pbody{display:grid;gap:4px;min-width:0;align-content:start}
+.pbody strong{font-size:1.05rem}
+.pbody .muted{font-size:.86rem}
+.fiche{display:grid;gap:14px}
+.back{justify-self:start}
+.fiche-head{display:grid;gap:14px}
+.fiche-photo{width:100%;max-height:300px;object-fit:cover;border-radius:var(--r);aspect-ratio:16/8;max-width:100%}
+.fiche-title{display:grid;gap:8px}
+.fiche-title p{color:var(--muted)}
+.fiche-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;align-items:start}
+.callout{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 12px;display:grid;gap:6px}
+.callout.bad{background:var(--bad-soft);color:var(--bad)}
+.callout.info{background:var(--accent-soft);color:var(--accent)}
+.measures{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.measure{display:grid;gap:4px}
+.measure span{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.spark{width:100%;max-width:200px;height:auto;display:block}
+.sp-band{fill:var(--ok-soft)} .sp-line{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round} .sp-dot{fill:var(--accent)}
+.hlist{display:grid;gap:6px}
+.hrow{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 10px;display:flex;gap:10px;align-items:center;text-align:left;cursor:pointer;color:inherit;min-width:0}
+.hrow img{width:48px;height:48px;border-radius:7px;object-fit:cover;flex:none}
+.hrow .hb{display:grid;gap:4px;min-width:0}
+.eqlist{display:grid;gap:8px}
+.eq{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:8px}
+.eq:first-child{border-top:0;padding-top:0}
+.contact{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.contact span{user-select:all;font-variant-numeric:tabular-nums}
+
+/* Besoins */
+.need-group{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;gap:8px}
+.need-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.need-head strong{font-family:var(--f-display);font-size:1.15rem}
+.need-row{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);padding-top:8px;flex-wrap:wrap}
+.need-row .nb{flex:1;min-width:160px;display:grid;gap:2px}
+
+/* Facturation */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;gap:2px}
+.tile span{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.tile b{font-family:var(--f-display);font-size:1.6rem;font-variant-numeric:tabular-nums}
+.bclient{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.bclient > button{appearance:none;border:0;background:transparent;width:100%;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;cursor:pointer;color:inherit}
+.bclient .bt{display:grid;gap:2px;min-width:0}
+.bclient .bt strong{font-size:1.05rem}
+.bclient .bsum{font-family:var(--f-display);font-weight:700;font-size:1.2rem;font-variant-numeric:tabular-nums}
+.bdetail{border-top:1px solid var(--line);padding:12px 14px;display:grid;gap:10px}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem;font-variant-numeric:tabular-nums}
+th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.r,th.r{text-align:right}
+.monthnav{display:flex;align-items:center;gap:4px}
+.monthnav strong{font-family:var(--f-display);font-size:1.35rem;min-width:9ch;text-align:center;text-transform:capitalize}
+
+/* Formulaires */
+.form{display:grid;gap:22px}
+fieldset{border:0;padding:0;margin:0;display:grid;gap:10px;min-width:0}
+legend{font-family:var(--f-display);font-weight:700;font-size:1rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:0;margin-bottom:8px}
+.f{display:grid;gap:5px;font-weight:500;min-width:0}
+.f > span{font-size:.9rem}
+.f small,.hint{color:var(--muted);font-weight:400;font-size:.82rem}
+input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{width:100%;min-width:0;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);font-size:16px}
+textarea{resize:vertical;min-height:72px}
+input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(--accent);margin:0;flex:none}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.check{display:flex;align-items:center;gap:8px;font-weight:500;cursor:pointer}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--surface-2);border-radius:10px;padding:3px;gap:3px}
+.seg label{display:grid;place-items:center;min-height:40px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.92rem;text-align:center;padding:0 6px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:var(--surface);box-shadow:var(--shadow);color:var(--accent)}
+.daypick{display:flex;flex-wrap:wrap;gap:6px}
+.daypick label{position:relative}
+.daypick input{position:absolute;opacity:0}
+.daypick span{display:grid;place-items:center;min-width:48px;height:40px;border-radius:9px;border:1px solid var(--line);font-weight:600;cursor:pointer}
+.daypick input:checked + span{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.daypick input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:560px){.mgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.mfield{display:grid;gap:4px;min-width:0}
+.mfield .ml{font-weight:600;font-size:.95rem}
+.mfield .ml small{color:var(--muted);font-weight:500}
+.mfield .mi{position:relative;display:block}
+.mfield .mi input{font-family:var(--f-display);font-size:1.45rem;font-weight:700;padding-right:34px;font-variant-numeric:tabular-nums}
+.mfield .mi .sw{position:absolute;right:12px;top:50%;width:16px;height:16px;transform:translateY(-50%)}
+.mfield .mh{font-size:.76rem;color:var(--muted)}
+.mfield.s-ok input{border-color:var(--ok);background:var(--ok-soft)}
+.mfield.s-warn input{border-color:var(--warn);background:var(--warn-soft)}
+.mfield.s-bad input{border-color:var(--bad);background:var(--bad-soft)}
+.mfield.missing input,.f.missing input,.f.missing select{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+.alerts{display:grid;gap:6px}
+.alert{border-radius:9px;padding:8px 11px;font-size:.9rem}
+.alert.warn{background:var(--warn-soft);color:var(--warn)}
+.alert.bad{background:var(--bad-soft);color:var(--bad)}
+.sugg{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.sugg .sq{display:grid;gap:2px;min-width:0}
+.sugg .sq b{font-family:var(--f-display);font-size:1.25rem}
+.prow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.prow select{flex:1 1 100%}
+.prow input[data-f=qty]{width:84px;flex:none}
+.prow input[data-f=price]{width:96px;flex:none}
+.prow input[data-f=note]{flex:1;min-width:120px}
+.prow .unit{color:var(--muted);font-size:.9rem;min-width:24px}
+.prow .icon-btn{margin-left:auto}
+.photo-prev{display:grid;gap:6px}
+.photo-prev img{width:100%;max-height:260px;object-fit:cover;border-radius:10px;max-width:100%}
+.errors{background:var(--bad-soft);color:var(--bad);border-radius:10px;padding:10px 12px;font-size:.92rem}
+.result{background:var(--accent-soft);color:var(--accent);border-radius:12px;padding:14px 16px;display:grid;gap:4px}
+.result b{font-family:var(--f-display);font-size:2rem;line-height:1}
+.daybtns{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.daybtns .btn{padding:0;min-width:0;font-size:.85rem}
+.stepper{display:flex;align-items:center;gap:8px;min-width:0}
+.stepper .st-btn{width:42px;height:42px;border:1px solid var(--line);background:var(--surface);font-size:1.35rem;font-weight:600;line-height:1}
+.stepper .st-val{min-width:30px;text-align:center;font-family:var(--f-display);font-weight:700;font-size:1.35rem;font-variant-numeric:tabular-nums}
+.stepper .st-range{flex:1;min-width:90px;height:32px;accent-color:var(--accent)}
+.rowbill{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1 1 100%}
+.rowbill > span{font-size:.88rem;color:var(--muted)}
+.prow .f{flex:1;min-width:130px}
+.mgrid12{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (min-width:560px){.mgrid12{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.mgrid12 select{padding:8px 6px}
+.monthfreq{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:6px}
+.monthfreq div{background:var(--surface-2);border-radius:8px;padding:5px 8px;display:grid;gap:1px}
+.monthfreq div.cur{background:var(--accent-soft);color:var(--accent)}
+.monthfreq span{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.monthfreq b{font-size:.9rem}
+.conn a{color:inherit;text-decoration:none;display:inline-flex;gap:8px;align-items:center}
+.conn .lk{color:var(--accent);font-weight:600}
+.menu{display:grid;gap:8px}
+.vdetail img{width:100%;border-radius:10px;max-width:100%}
+.prodlist{display:grid;gap:6px}
+.prodrow{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;cursor:pointer;color:inherit;flex-wrap:wrap}
+
+/* Feuille (sheet) */
+#sheet-root{position:fixed;inset:0;z-index:50}
+.backdrop{position:absolute;inset:0;background:var(--scrim)}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:calc(100% - env(safe-area-inset-top,0px) - 12px);display:flex;flex-direction:column;background:var(--surface);border-radius:16px 16px 0 0;box-shadow:var(--shadow)}
+@media (min-width:760px){.sheet{left:50%;right:auto;bottom:auto;top:4vh;width:min(700px,calc(100% - 48px));max-height:92vh;transform:translateX(-50%);border-radius:16px}}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px max(12px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line)}
+.sheet-h h2{font-size:1.25rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sheet-b{overflow:auto;padding:16px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));flex:1;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.sheet-f{padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
+.sheet-f .btn{flex:1}
+
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 14px);z-index:80;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;font-size:.92rem;max-width:min(92vw,520px);box-shadow:var(--shadow)}
+#toast.bad{background:var(--bad);color:#fff}
+@media (prefers-reduced-motion: no-preference){ .sheet{animation:up .18s ease-out} @keyframes up{from{transform:translateY(16px);opacity:.6}} @media (min-width:760px){ @keyframes up{from{transform:translate(-50%,10px);opacity:.6}} } }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span class="brand-mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 15c2 0 2-1.5 4.5-1.5S10 15 12 15s2-1.5 4.5-1.5S19 15 21 15M3 19c2 0 2-1.5 4.5-1.5S10 19 12 19s2-1.5 4.5-1.5S19 19 21 19M8 11V5a2 2 0 0 1 4 0M16 11V5a2 2 0 0 0-4 0"/></svg></span><span class="brand-name">Tournée</span><span class="brand-tab" id="tabname">Planning</span></div>
+  <span class="sync" id="sync">Connexion…</span>
+</div></header>
+<main><div class="wrap" id="view"><p class="loading">Chargement de l’appli…</p></div></main>
+<nav class="tabs" aria-label="Sections"><div class="wrap">
+  <button data-tab="planning" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Planning</button>
+  <button data-tab="piscines"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c3.5 4.6 6 8 6 11a6 6 0 0 1-12 0c0-3 2.5-6.4 6-11z"/></svg>Piscines</button>
+  <button data-tab="besoins"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2.5l2.2 11h10.6l2-8H7"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg>Besoins<span class="count" id="needcount" hidden></span></button>
+  <button data-tab="facturation"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Facturation</button>
+  <button data-tab="reglages"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Réglages</button>
+</div></nav>
+<div id="sheet-root" hidden></div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script id="logic">
+window.L = (() => {
+  const pad = n => String(n).padStart(2, '0');
+  const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const parse = s => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1, 12); };
+  const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ymd(d); };
+  const dow = s => ((parse(s).getDay() + 6) % 7) + 1;
+  const mondayOf = s => addDays(s, 1 - dow(s));
+  const weekDays = mon => Array.from({ length: 7 }, (_, i) => addDays(mon, i));
+  const isoWeek = s => { const d = parse(s); d.setDate(d.getDate() + 4 - dow(ymd(d))); const y0 = new Date(d.getFullYear(), 0, 1, 12); return Math.ceil((Math.round((d - y0) / 864e5) + 1) / 7); };
+  const ym = s => String(s).slice(0, 7);
+  const addMonths = (m, n) => { let [y, mo] = String(m).split('-').map(Number); mo += n; y += Math.floor((mo - 1) / 12); mo = (((mo - 1) % 12) + 12) % 12 + 1; return `${y}-${pad(mo)}`; };
+  const monthsBetween = (a, b) => { const [y1, m1] = a.split('-').map(Number); const [y2, m2] = b.split('-').map(Number); return (y2 - y1) * 12 + (m2 - m1); };
+  const inSeason = (s, st) => { const m = Number(String(s).slice(5, 7)); const a = +st.seasonStart, b = +st.seasonEnd; return a <= b ? (m >= a && m <= b) : (m >= a || m <= b); };
+  const isPeak = (s, st) => (st.peakMonths || []).map(Number).includes(Number(String(s).slice(5, 7)));
+  const num = v => { if (v === null || v === undefined) return null; const s = String(v).trim().replace(/\s/g, '').replace(',', '.'); if (s === '') return null; const n = Number(s); return Number.isFinite(n) ? n : null; };
+  const round = (v, d = 2) => { const f = 10 ** d; return Math.round(v * f) / f; };
+  function parseGps(t) {
+    if (!t) return null;
+    const m = String(t).match(/(-?\d{1,2}\.\d{2,})\s*[,;\s]\s*(-?\d{1,3}\.\d{2,})/);
+    if (!m) return null;
+    const lat = +m[1], lng = +m[2];
+    if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+    return { lat: round(lat, 6), lng: round(lng, 6) };
+  }
+  function km(a, b) { const R = 6371, r = x => x * Math.PI / 180; const dLat = r(b.lat - a.lat), dLng = r(b.lng - a.lng); const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLng / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); }
+  function travel(a, b, date, st) { if (!a || !b) return null; const d = km(a, b) * (+st.detour || 1.3); const v = isPeak(date, st) ? +st.speedPeak : +st.speedOff; return { km: d, min: d / (v || 30) * 60 }; }
+  const toMin = t => { const [h, m] = String(t || '08:00').split(':').map(Number); return (h || 0) * 60 + (m || 0); };
+  function schedule(items, st, date) {
+    let t = toMin(st.startTime), pos = st.startGps || null, kmT = 0, drive = 0, work = 0, unknown = 0;
+    const rows = [];
+    items.forEach(it => {
+      const tr = pos && it.gps ? travel(pos, it.gps, date, st) : null;
+      if (!it.gps) unknown++;
+      const tmin = tr ? tr.min + (+st.stopOverhead || 0) : 0;
+      if (tr) { kmT += tr.km; drive += tmin; }
+      const arrive = t + tmin, d = +it.duration || 40;
+      rows.push({ id: it.id, travel: tr ? tmin : null, km: tr ? tr.km : null, arrive, duration: d, leave: arrive + d });
+      t = arrive + d; work += d; if (it.gps) pos = it.gps;
+    });
+    const back = pos && st.startGps && items.length ? travel(pos, st.startGps, date, st) : null;
+    if (back) { kmT += back.km; drive += back.min; }
+    return { rows, km: kmT, drive, work, end: t, endHome: t + (back ? back.min : 0), unknown };
+  }
+  function bestOrder(pts, start, roundTrip = true) {
+    const n = pts.length;
+    if (n < 2) return pts.map(p => p.id);
+    const cost = ord => { let c = 0, prev = start; for (const i of ord) { if (prev) c += km(prev, pts[i].gps); prev = pts[i].gps; } if (roundTrip && start) c += km(prev, start); return c; };
+    let best = [...Array(n).keys()], bestC = cost(best);
+    if (n <= 8) {
+      const a = best.slice(), c = Array(n).fill(0); let i = 1;
+      while (i < n) {
+        if (c[i] < i) { const k = i % 2 ? c[i] : 0; [a[k], a[i]] = [a[i], a[k]]; const v = cost(a); if (v < bestC - 1e-9) { bestC = v; best = a.slice(); } c[i]++; i = 1; }
+        else { c[i] = 0; i++; }
+      }
+    } else {
+      const rem = new Set(best), ord = []; let prev = start || pts[0].gps;
+      while (rem.size) { let bi = -1, bd = Infinity; for (const j of rem) { const d = km(prev, pts[j].gps); if (d < bd) { bd = d; bi = j; } } ord.push(bi); rem.delete(bi); prev = pts[bi].gps; }
+      let cur = ord, curC = cost(cur), improved = true, guard = 0;
+      while (improved && guard++ < 100) {
+        improved = false;
+        for (let x = 0; x < n - 1; x++) for (let y = x + 1; y < n; y++) {
+          const cand = cur.slice(0, x).concat(cur.slice(x, y + 1).reverse(), cur.slice(y + 1));
+          const cc = cost(cand); if (cc < curC - 1e-9) { cur = cand; curC = cc; improved = true; }
+        }
+      }
+      if (curC < bestC) { best = cur; bestC = curC; }
+    }
+    return best.map(i => pts[i].id);
+  }
+  function doseStep(dose, step, current, target, volume) {
+    const vals = [dose, step, current, target, volume];
+    if (vals.some(v => v == null || !Number.isFinite(+v)) || +step <= 0) return null;
+    return Math.abs(target - current) / step * dose * volume;
+  }
+  const doseFixed = (dose, volume) => (dose == null || volume == null) ? null : dose * volume;
+  const drainPct = (cur, tgt) => (cur == null || tgt == null || cur <= tgt || cur <= 0) ? 0 : 1 - tgt / cur;
+  function fmtQty(q, unit) {
+    if (q == null || !Number.isFinite(q)) return '–';
+    const u = unit || '';
+    const fr = (v, d) => v.toLocaleString('fr-FR', { maximumFractionDigits: d });
+    if (u === 'g' || u === 'ml') {
+      const big = u === 'g' ? 'kg' : 'L';
+      if (q >= 1000) return `${fr(q / 1000, 2)} ${big}`;
+      const r = q >= 200 ? Math.round(q / 10) * 10 : Math.round(q / 5) * 5;
+      return `${fr(q > 0 ? Math.max(r, 5) : 0, 0)} ${u}`;
+    }
+    return `${fr(q, 2)} ${u}`.trim();
+  }
+  function toSaleQty(prod, q) {
+    if (q == null) return null;
+    const du = (prod.doseUnit || 'g').toLowerCase(), su = (prod.unit || '').toLowerCase();
+    if (du === su) return round(q, 2);
+    if (du === 'g' && su === 'kg') return round(q / 1000, 2);
+    if (du === 'ml' && su === 'l') return round(q / 1000, 2);
+    if (du === 'kg' && su === 'g') return round(q * 1000, 0);
+    return null;
+  }
+  function status(v, t) {
+    if (v == null || !t) return null;
+    if ((t.alertMin != null && v < t.alertMin) || (t.alertMax != null && v > t.alertMax)) return 'bad';
+    if ((t.min != null && v < t.min) || (t.max != null && v > t.max)) return 'warn';
+    return 'ok';
+  }
+  const SEASON_FALLBACK = [5, 6, 7, 8, 9];
+  function freqFor(p, date) {
+    const m = Number(String(date).slice(5, 7));
+    if (Array.isArray(p.freqByMonth) && p.freqByMonth.length === 12) return Number(p.freqByMonth[m - 1]) || 0;
+    return Number(SEASON_FALLBACK.includes(m) ? p.freqSeason : p.freqOff) || 0;
+  }
+  const weekOfMonth = s => Math.ceil(parse(s).getDate() / 7);
+  function packsFor(prod, q) {
+    if (q == null || !Number.isFinite(q)) return null;
+    const du = (prod.doseUnit || 'g').toLowerCase(), pu = (prod.packUnit || '').toLowerCase();
+    let x = null;
+    if (du === pu) x = q; else if (du === 'g' && pu === 'kg') x = q / 1000; else if (du === 'ml' && pu === 'l') x = q / 1000; else if (du === 'kg' && pu === 'g') x = q * 1000;
+    if (x == null) return null;
+    const size = +prod.packSize;
+    return { qty: round(x, 2), unit: prod.packUnit || '', packs: size > 0 ? Math.max(1, Math.ceil(x / size - 1e-9)) : null };
+  }
+  function planWeek(mon, pools, allStops, st, minDate) {
+    const days = weekDays(mon), mid = days[3], wk = isoWeek(mon), midMonth = ym(mid);
+    const weekStops = allStops.filter(s => days.includes(s.date));
+    const load = {}; days.forEach(d => { load[d] = 0; });
+    weekStops.forEach(s => { if (load[s.date] != null) load[s.date]++; });
+    const out = [];
+    for (const p of pools) {
+      if (p.active === false) continue;
+      const f = freqFor(p, mid);
+      if (f <= 0) continue;
+      let n, monthly = false;
+      if (f < 0.5) {
+        monthly = true;
+        if (weekOfMonth(mid) < (Number(p.monthWeek) || 1)) continue;
+        if (allStops.some(s => s.poolId === p.id && s.type !== 'ponctuel' && ym(s.date) === midMonth)) continue;
+        n = 1;
+      }
+      else if (f < 1) { if (wk % 2 !== (Number(p.parity) || 0)) continue; n = 1; }
+      else n = Math.round(f);
+      const mine = weekStops.filter(s => s.poolId === p.id && s.type !== 'ponctuel');
+      const need = n - mine.length;
+      if (need <= 0) continue;
+      const taken = new Set(mine.map(s => dow(s.date)));
+      const work = (st.workDays || [1, 2, 3, 4, 5, 6]).map(Number);
+      const free = d => !taken.has(d) && (!minDate || days[d - 1] >= minDate) && (!monthly || ym(days[d - 1]) === midMonth);
+      let cands = ((p.prefDays && p.prefDays.length) ? p.prefDays.map(Number) : work).filter(free).sort((a, b) => a - b);
+      if (!cands.length) cands = work.filter(free);
+      if (!cands.length) continue;
+      const picks = [];
+      if (cands.length <= need) picks.push(...cands);
+      else for (let i = 0; i < need; i++) {
+        const seg = cands.slice(Math.floor(i * cands.length / need), Math.floor((i + 1) * cands.length / need));
+        seg.sort((a, b) => load[days[a - 1]] - load[days[b - 1]] || a - b);
+        picks.push(seg[0]);
+      }
+      for (const d of picks) { const date = days[d - 1]; out.push({ poolId: p.id, date, type: 'entretien', priority: false, status: 'prevu' }); load[date]++; }
+    }
+    return out;
+  }
+  const fr1 = v => (+v).toLocaleString('fr-FR', { maximumFractionDigits: 1 });
+  function trends(series, th, treatment) {
+    const out = [];
+    const last3 = k => series.map(v => v[k]).filter(v => v != null).slice(-3);
+    const up = a => a.length === 3 && a[0] < a[1] && a[1] < a[2];
+    const down = a => a.length === 3 && a[0] > a[1] && a[1] > a[2];
+    const ph = last3('ph');
+    if (up(ph) && ph[2] >= th.ph.max - 0.05) out.push({ level: 'warn', text: `pH en hausse sur 3 passages (${ph.map(fr1).join(' → ')}) : le TAC pousse le pH vers le haut, vérifie-le et la régulation pH.` });
+    const cl = last3('cl');
+    if (down(cl) && cl[2] < th.cl.min) out.push({ level: 'warn', text: `Chlore libre en baisse sur 3 passages (${cl.map(fr1).join(' → ')}) : la production ne suit plus la demande.` });
+    const cya = last3('cya');
+    if (treatment === 'galets' && up(cya)) out.push({ level: 'warn', text: `Stabilisant en hausse sur 3 passages (${cya.map(fr1).join(' → ')}) : chaque galet de trichlore en ajoute. Prévois une vidange partielle avant ${th.cya.alertMax} ppm.` });
+    return out;
+  }
+  function equipDue(e, defLife, nowYm) {
+    const lm = +e.life || +defLife || 0;
+    if (!e.installed || !lm) return null;
+    const due = addMonths(String(e.installed).slice(0, 7), lm);
+    const left = monthsBetween(nowYm, due);
+    return { due, left, level: left < 0 ? 'bad' : left <= 3 ? 'warn' : 'ok' };
+  }
+  const csv = rows => '﻿' + rows.map(r => r.map(c => { const s = String(c ?? ''); return /[;"\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; }).join(';')).join('\r\n');
+  function vat(sum, v) {
+    if (!v || !v.enabled) return { ht: sum, tva: 0, ttc: sum };
+    const r = (+v.rate || 0) / 100;
+    if (v.mode === 'TTC') { const ht = sum / (1 + r); return { ht, tva: sum - ht, ttc: sum }; }
+    return { ht: sum, tva: sum * r, ttc: sum * (1 + r) };
+  }
+  return { pad, ymd, parse, addDays, dow, mondayOf, weekDays, isoWeek, ym, addMonths, monthsBetween, inSeason, isPeak, num, round, parseGps, km, travel, toMin, schedule, bestOrder, doseStep, doseFixed, drainPct, fmtQty, toSaleQty, packsFor, freqFor, weekOfMonth, status, planWeek, trends, equipDue, csv, vat };
+})();
+</script>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- Constantes métier ---------- */
+const DEFAULTS = {
+  startAddress: '', startGps: null, startTime: '08:00', workDays: [1, 2, 3, 4, 5, 6],
+  peakMonths: [7, 8], speedOff: 40, speedPeak: 22, detour: 1.35, stopOverhead: 3,
+  th: {
+    ph: { min: 7.0, max: 7.6, alertMin: 6.8, alertMax: 7.8, target: 7.2 },
+    cl: { min: 1, max: 3, alertMin: 0.5, alertMax: 5 },
+    tac: { min: 80, max: 150, alertMin: 60, alertMax: 200, target: 100 },
+    cya: { min: 20, max: 50, alertMin: 0, alertMax: 75, target: 30 },
+    redox: { min: 650, max: 800, alertMin: 600, alertMax: 900 },
+    sel: { min: 3, max: 5, alertMin: 2.5, alertMax: 6, target: 4 }
+  },
+  equipLife: { sable: 60, verre: 120, cellule: 60, cartouche: 24, sonde: 24 }
+};
+const FILTRATION = { sable: 'Filtre à sable', verre: 'Filtre à verre', cartouche: 'Filtre à cartouche', diatomee: 'Filtre diatomée', poches: 'Bloc filtrant à poches (type Desjoyaux)', autre: 'Autre' };
+const COUVERTURE = { aucune: 'Aucune', volet: 'Volet roulant', barres: 'Bâche à barres', hivernage: 'Bâche d’hivernage', bulles: 'Bâche à bulles', abri: 'Abri', autre: 'Autre' };
+const TRAITEMENT = { electrolyseur: 'Électrolyseur au sel', liquide: 'Chlore liquide (redox)', galets: 'Galets de chlore' };
+const TRT_SHORT = { electrolyseur: 'Électrolyseur', liquide: 'Chlore liquide', galets: 'Galets' };
+const FREQ = [[0, 'Aucun passage', '—'], [0.25, '1 par mois', '1/mois'], [0.5, '1 toutes les 2 semaines', '1/2 sem.'], [1, '1 par semaine', '1/sem.'], [2, '2 par semaine', '2/sem.'], [3, '3 par semaine', '3/sem.'], [4, '4 par semaine', '4/sem.'], [5, '5 par semaine', '5/sem.'], [6, '6 par semaine', '6/sem.']];
+const FREQ_DEFAULT = [0.5, 0.5, 0.5, 1, 1, 2, 2, 2, 1, 1, 0.5, 0.5];
+const PACK_UNITS = ['kg', 'g', 'L', 'ml', 'galets', 'pièces'];
+const EQUIP = {
+  pompe: { label: 'Pompe', life: null }, sable: { label: 'Sable du filtre', life: 'sable' }, verre: { label: 'Verre filtrant', life: 'verre' },
+  cartouche: { label: 'Cartouche filtrante', life: 'cartouche' }, cellule: { label: 'Cellule d’électrolyseur', life: 'cellule' },
+  sonde: { label: 'Sonde pH / redox', life: 'sonde' }, robot: { label: 'Robot', life: null }, chauffage: { label: 'Chauffage / PAC', life: null }, autre: { label: 'Autre', life: null }
+};
+const PKIND = { ph_minus: 'pH moins', ph_plus: 'pH plus', tac_plus: 'TAC +', choc: 'Chlore choc', stab: 'Stabilisant', sel: 'Sel', galet: 'Galets de chlore', liquide: 'Chlore liquide', autre: 'Autre' };
+const PARAM_OF = { ph_minus: 'ph', ph_plus: 'ph', tac_plus: 'tac', stab: 'cya', sel: 'sel' };
+const STEP_LABEL = { ph: 'de pH', tac: 'ppm de TAC', cya: 'ppm de stabilisant', sel: 'g/L de sel' };
+const PARAMS = { cl: { label: 'Chlore libre', unit: 'ppm', d: 1 }, ph: { label: 'pH', unit: '', d: 1 }, tac: { label: 'TAC', unit: 'ppm', d: 0 }, cya: { label: 'Stabilisant', unit: 'ppm', d: 0 }, redox: { label: 'Redox', unit: 'mV', d: 0 }, sel: { label: 'Sel', unit: 'g/L', d: 1 } };
+const PONCTUELS = ['Remise en route', 'Hivernage', 'Dépannage', 'Nettoyage', 'Vidange', 'Autre'];
+const PH_SCALE = [[6.8, '#F2C14E'], [7.0, '#F0A44C'], [7.2, '#EB834B'], [7.4, '#E2604F'], [7.6, '#D64460'], [7.8, '#C5356C'], [8.2, '#A8296F']];
+const DPD_SCALE = [[0, '#F8ECF1'], [0.5, '#F1CADA'], [1, '#E8A7C2'], [1.5, '#DE88AE'], [2, '#D46B9B'], [3, '#BF4E86'], [5, '#9E306C']];
+const DOW = ['', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+const DOW_LONG = ['', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+const MONTHS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+const MONTHS_S = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+const TABS = { planning: 'Planning', piscines: 'Piscines', besoins: 'Besoins produits', facturation: 'Facturation', reglages: 'Réglages' };
+
+const ic = (d, extra = '') => `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${d}</svg>`;
+const ICON = {
+  left: ic('<path d="M15 5l-7 7 7 7"/>'), right: ic('<path d="M9 5l7 7-7 7"/>'), x: ic('<path d="M6 6l12 12M18 6L6 18"/>'),
+  grip: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>`,
+  car: ic('<path d="M5 16v-5l2-5h10l2 5v5M3.5 16h17M5 11h14"/><circle cx="8" cy="17.5" r="1.4"/><circle cx="16" cy="17.5" r="1.4"/>'),
+  pin: ic('<path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/>'),
+  drop: ic('<path d="M12 3c3.5 4.6 6 8 6 11a6 6 0 0 1-12 0c0-3 2.5-6.4 6-11z"/>', 'width="30" height="30"'),
+  cam: ic('<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>')
+};
+
+/* ---------- Outils ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+const today = () => L.ymd(new Date());
+const clone = o => JSON.parse(JSON.stringify(o ?? null));
+const nf = (v, d = 1) => (v == null || v === '' || !Number.isFinite(+v)) ? '–' : (+v).toLocaleString('fr-FR', { maximumFractionDigits: d });
+const eur = v => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(+v || 0);
+const hm = m => { m = Math.round(m); return `${Math.floor(m / 60)}h${String(((m % 60) + 60) % 60).padStart(2, '0')}`; };
+const dur = m => { m = Math.round(m || 0); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, '0')}` : `${h} h`; };
+const dayLabel = (s, long) => { const d = L.parse(s); return long ? `${DOW_LONG[L.dow(s)]} ${d.getDate()} ${MONTHS[d.getMonth()]}` : `${DOW[L.dow(s)]} ${d.getDate()}`; };
+const shortDate = s => { const d = L.parse(s); return `${d.getDate()} ${MONTHS_S[d.getMonth()]}`; };
+const dateFr = s => { const d = L.parse(s); return `${L.pad(d.getDate())}/${L.pad(d.getMonth() + 1)}/${d.getFullYear()}`; };
+const monthLabel = m => { const [y, mo] = m.split('-').map(Number); return `${MONTHS[mo - 1]} ${y}`; };
+const town = a => { if (!a) return ''; const m = String(a).match(/\b\d{5}\s+([^,]+)/); if (m) return m[1].trim(); const parts = String(a).split(',').map(s => s.trim()).filter(Boolean); return parts.length > 1 ? parts[parts.length - 1] : ''; };
+const swatch = (scale, v) => { if (v == null) return null; let best = scale[0]; for (const s of scale) if (Math.abs(s[0] - v) < Math.abs(best[0] - v)) best = s; return best[1]; };
+const freqLabel = f => (FREQ.find(x => x[0] === +f) || [0, '–'])[1];
+const freqShort = f => (FREQ.find(x => x[0] === +f) || [0, '–', '–'])[2];
+const gpsText = g => g ? `${g.lat}, ${g.lng}` : '';
+const priceLabel = () => '€';
+const packName = p => (p && p.pack) || 'conditionnement';
+const packPlural = (n, p) => `${nf(n, 0)} × ${packName(p)}`;
+const plansUrl = (from, toGps, toAddr) => {
+  const to = toGps ? `${toGps.lat},${toGps.lng}` : (toAddr ? encodeURIComponent(toAddr) : '');
+  if (!to) return '';
+  return `https://maps.apple.com/?${from ? `saddr=${from.lat},${from.lng}&` : ''}daddr=${to}&dirflg=d`;
+};
+function stepper({ attr, value = 0, min = 0, max = 20, slider = false, label = 'Quantité' }) {
+  const v = Math.max(min, Math.min(max, Math.round(+value || 0)));
+  return `<div class="stepper"><button type="button" class="icon-btn st-btn" data-step="-1" aria-label="${esc(label)} : moins un">−</button>${slider ? `<input type="range" class="st-range" min="${min}" max="${max}" step="1" value="${v}" aria-label="${esc(label)}">` : ''}<output class="st-val">${v}</output><input type="hidden" ${attr} value="${v}" data-min="${min}" data-max="${max}"><button type="button" class="icon-btn st-btn" data-step="1" aria-label="${esc(label)} : plus un">+</button></div>`;
+}
+function stepTo(box, v) {
+  const h = box.querySelector('input[type=hidden]'); const min = +h.dataset.min, max = +h.dataset.max;
+  v = Math.max(min, Math.min(max, Math.round(v)));
+  h.value = v; box.querySelector('.st-val').textContent = v;
+  const r = box.querySelector('.st-range'); if (r) r.value = v;
+  h.dispatchEvent(new Event('input', { bubbles: true }));
+}
+function merge(a, b) {
+  if (b == null) return a;
+  if (typeof a !== 'object' || a === null || Array.isArray(a)) return b;
+  const o = { ...a };
+  for (const k of Object.keys(b)) o[k] = (a[k] && typeof a[k] === 'object' && !Array.isArray(a[k]) && b[k] && typeof b[k] === 'object' && !Array.isArray(b[k])) ? merge(a[k], b[k]) : b[k];
+  return o;
+}
+
+/* ---------- État ---------- */
+const T0 = today();
+const STOPS_FROM = L.addDays(T0, -120), VISITS_FROM = L.addDays(T0, -365), LINES_FROM = L.addMonths(L.ym(T0), -13);
+const S = { ready: false, synced: false, slow: false, error: null, pools: {}, stops: {}, visits: {}, needs: {}, lines: {}, extraLines: {}, products: {}, invoiced: {}, settingsDoc: null };
+const UI = { tab: 'planning', week: L.mondayOf(T0), day: T0, poolId: null, billMonth: L.ym(T0), search: '', openBill: {} };
+let db = null, assets = null, downloads = null;
+const settings = () => merge(DEFAULTS, S.settingsDoc || {});
+const pools = () => Object.values(S.pools).filter(p => p.active !== false).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'fr'));
+const products = () => Object.values(S.products).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'fr'));
+const productOfKind = k => products().find(p => p.kind === k);
+const dayStops = date => Object.values(S.stops).filter(s => s.date === date).sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || (a.createdAt || 0) - (b.createdAt || 0));
+const poolVisits = id => Object.values(S.visits).filter(v => v.poolId === id).sort((a, b) => (a.at || a.date || '').localeCompare(b.at || b.date || ''));
+const nextStopOf = id => { const t = today(); return Object.values(S.stops).filter(s => s.poolId === id && s.status !== 'fait' && s.date >= t).sort((a, b) => a.date.localeCompare(b.date) || (a.order ?? 0) - (b.order ?? 0))[0]; };
+const openNeeds = () => Object.values(S.needs).filter(n => n.status !== 'bought');
+const monthLines = m => [...Object.values(S.lines), ...Object.values(S.extraLines)].filter(l => l.month === m);
+
+/* ---------- Écritures ---------- */
+const strip = o => JSON.parse(JSON.stringify(o));
+const put = (col, id, data) => db.collection(col).doc(id).set(strip(data));
+const upd = (col, id, data) => db.collection(col).doc(id).update(strip(data));
+const del = (col, id) => db.collection(col).doc(id).delete();
+function errMsg(e) {
+  const c = e && e.code;
+  if (c === 'quota_exceeded') return 'Stockage du téléphone plein : libère de la place ou supprime d’anciennes photos.';
+  if (c === 'invalid_argument') return 'Enregistrement impossible : élément introuvable.';
+  if (c === 'unavailable' || c === 'store_unavailable') return 'Serveur injoignable. Réessaie dans un instant.';
+  if (c === 'resource_exhausted' || c === 'rate_limited') return 'Trop d’opérations d’un coup. Patiente quelques secondes.';
+  return 'Erreur : ' + ((e && (e.message || e.code)) || 'inconnue');
+}
+async function run(promises, okMsg) {
+  try { await Promise.all([].concat(promises)); if (okMsg) toast(okMsg); return true; }
+  catch (e) { toast(errMsg(e), true); return false; }
+}
+let toastTimer = null;
+function toast(msg, bad) { const t = $('#toast'); t.textContent = msg; t.className = bad ? 'bad' : ''; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, bad ? 5200 : 2600); }
+function armed(btn, label = 'Confirmer') {
+  if (btn.dataset.armed) return true;
+  btn.dataset.armed = '1'; btn.dataset.label = btn.textContent; btn.textContent = label; btn.classList.add('armed');
+  setTimeout(() => { if (btn.isConnected && btn.dataset.armed) { delete btn.dataset.armed; btn.textContent = btn.dataset.label; btn.classList.remove('armed'); } }, 4000);
+  return false;
+}
+async function copy(text) { try { await navigator.clipboard.writeText(text); toast('Copié'); } catch { toast('Copie impossible ici : sélectionne le texte.', true); } }
+
+/* ---------- Stockage local (IndexedDB) ---------- */
+const APP_VERSION = '1.0';
+const LocalDB = (() => {
+  const NAME = 'tournee-piscines';
+  let idb = null;
+  const mem = new Map(), listeners = new Set();
+  const mapErr = e => ({ code: e && e.name === 'QuotaExceededError' ? 'quota_exceeded' : 'unavailable', message: (e && e.message) || 'Erreur de stockage local' });
+  const openDb = () => new Promise((res, rej) => {
+    const r = indexedDB.open(NAME, 1);
+    r.onupgradeneeded = () => { const d = r.result; if (!d.objectStoreNames.contains('docs')) d.createObjectStore('docs'); if (!d.objectStoreNames.contains('blobs')) d.createObjectStore('blobs'); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); r.onblocked = () => rej(new Error('Stockage bloqué'));
+  });
+  const write = (store, fn) => new Promise((res, rej) => { const t = idb.transaction(store, 'readwrite'); fn(t.objectStore(store)); t.oncomplete = () => res(); t.onerror = () => rej(mapErr(t.error)); t.onabort = () => rej(mapErr(t.error)); });
+  const read = (store, fn) => new Promise((res, rej) => { const t = idb.transaction(store, 'readonly'); const r = fn(t.objectStore(store)); t.oncomplete = () => res(r.result); t.onerror = () => rej(mapErr(t.error)); });
+  async function init() {
+    idb = await openDb();
+    const [keys, vals] = await new Promise((res, rej) => { const t = idb.transaction('docs', 'readonly'), st = t.objectStore('docs'); const k = st.getAllKeys(), v = st.getAll(); t.oncomplete = () => res([k.result, v.result]); t.onerror = () => rej(t.error); });
+    keys.forEach((k, i) => mem.set(k, vals[i]));
+  }
+  let queued = false;
+  const notify = () => { if (queued) return; queued = true; setTimeout(() => { queued = false; listeners.forEach(l => l()); }, 0); };
+  const meta = { fromCache: false, hasPendingWrites: false };
+  const snapDoc = (id, data) => ({ id, exists: data !== undefined, data: () => data, metadata: meta });
+  const match = (d, fl) => fl.every(([f, op, v]) => { const x = d[f]; return op === '==' ? x === v : op === '!=' ? x !== v : op === '>=' ? x >= v : op === '>' ? x > v : op === '<=' ? x <= v : op === '<' ? x < v : op === 'in' ? v.includes(x) : true; });
+  function query(col, fl = []) {
+    const prefix = col + '/';
+    const run = () => { const out = []; mem.forEach((d, k) => { if (k.startsWith(prefix) && !k.slice(prefix.length).includes('/') && match(d, fl)) out.push(snapDoc(k.slice(prefix.length), d)); }); return out; };
+    const snap = () => { const docs = run(); return { docs, size: docs.length, empty: !docs.length, docChanges: () => [], metadata: meta }; };
+    return {
+      where: (f, op, v) => query(col, [...fl, [f, op, v]]), orderBy: () => query(col, fl), limit: () => query(col, fl),
+      get: async () => snap(),
+      onSnapshot(next) { const l = () => next(snap()); listeners.add(l); setTimeout(l, 0); return () => listeners.delete(l); },
+      doc: id => docRef(prefix + (id || uid()))
+    };
+  }
+  function docRef(path) {
+    const id = path.split('/').pop();
+    return {
+      id, path,
+      get: async () => snapDoc(id, mem.get(path)),
+      async set(data) { const v = JSON.parse(JSON.stringify(data)); await write('docs', st => st.put(v, path)); mem.set(path, v); notify(); },
+      async update(data) { const cur = mem.get(path); if (!cur) throw { code: 'invalid_argument', message: 'Élément introuvable' }; const v = { ...cur, ...JSON.parse(JSON.stringify(data)) }; await write('docs', st => st.put(v, path)); mem.set(path, v); notify(); },
+      async delete() { await write('docs', st => st.delete(path)); mem.delete(path); notify(); },
+      onSnapshot(next) { const l = () => next(snapDoc(id, mem.get(path))); listeners.add(l); setTimeout(l, 0); return () => listeners.delete(l); }
+    };
+  }
+  async function putBlob(blob, id = uid()) { const buf = await blob.arrayBuffer(); await write('blobs', st => st.put({ type: blob.type || 'image/jpeg', buf }, id)); return id; }
+  async function getBlob(id) { const v = await read('blobs', st => st.get(id)); return v ? new Blob([v.buf], { type: v.type }) : null; }
+  const delBlob = id => write('blobs', st => st.delete(id));
+  const blobKeys = () => read('blobs', st => st.getAllKeys());
+  const dump = () => Object.fromEntries(mem);
+  async function restore(backup) {
+    await write('docs', st => { st.clear(); Object.entries(backup.docs || {}).forEach(([k, v]) => st.put(v, k)); });
+    await write('blobs', st => st.clear());
+    for (const [id, b] of Object.entries(backup.blobs || {})) {
+      const bin = atob(b.b64), arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      await write('blobs', st => st.put({ type: b.type || 'image/jpeg', buf: arr.buffer }, id));
+    }
+  }
+  return { init, doc: docRef, collection: c => query(c), putBlob, getBlob, delBlob, blobKeys, dump, restore, size: () => mem.size };
+})();
+
+const blobUrls = new Map();
+const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+const blobSrc = id => blobUrls.get(id) || BLANK;
+async function hydrate(root) {
+  if (!root) return;
+  for (const img of Array.from(root.querySelectorAll('img[data-blob]'))) {
+    const id = img.dataset.blob; if (!id) continue;
+    if (blobUrls.has(id)) { if (img.src !== blobUrls.get(id)) img.src = blobUrls.get(id); continue; }
+    try { const b = await LocalDB.getBlob(id); if (!b) continue; const u = URL.createObjectURL(b); blobUrls.set(id, u); document.querySelectorAll('img[data-blob]').forEach(i => { if (i.dataset.blob === id) i.src = u; }); } catch { }
+  }
+}
+const assetsLocal = {
+  async upload(blob) { const id = await LocalDB.putBlob(blob); const url = URL.createObjectURL(blob); blobUrls.set(id, url); return { id, url, sizeBytes: blob.size, contentType: blob.type }; },
+  async delete(id) { await LocalDB.delBlob(id); const u = blobUrls.get(id); if (u) { URL.revokeObjectURL(u); blobUrls.delete(id); } return { deleted: true }; }
+};
+const downloadsLocal = {
+  async save({ filename, data }) {
+    const type = filename.endsWith('.csv') ? 'text/csv' : filename.endsWith('.json') ? 'application/json' : 'application/octet-stream';
+    const file = new File([data], filename, { type });
+    if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: filename }); return { status: 'saved' }; }
+      catch (e) { if (e && e.name === 'AbortError') throw { code: 'declined' }; }
+    }
+    const url = URL.createObjectURL(file), a = document.createElement('a');
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
+    return { status: 'saved' };
+  }
+};
+const DEFAULT_PRODUCTS = {
+  'ph-moins': { name: 'pH moins (micro-billes)', kind: 'ph_minus', calc: 'step', dose: 10, doseUnit: 'g', step: 0.1, pack: 'Seau 5 kg', packSize: 5, packUnit: 'kg', price: null },
+  'ph-plus': { name: 'pH plus', kind: 'ph_plus', calc: 'step', dose: 10, doseUnit: 'g', step: 0.1, pack: 'Seau 5 kg', packSize: 5, packUnit: 'kg', price: null },
+  'tac-plus': { name: 'TAC + (bicarbonate de sodium)', kind: 'tac_plus', calc: 'step', dose: 17, doseUnit: 'g', step: 10, pack: 'Seau 5 kg', packSize: 5, packUnit: 'kg', price: null },
+  'chlore-choc': { name: 'Chlore choc (granulés)', kind: 'choc', calc: 'fixe', dose: 15, doseUnit: 'g', step: null, pack: 'Seau 5 kg', packSize: 5, packUnit: 'kg', price: null },
+  'stabilisant': { name: 'Stabilisant (acide cyanurique)', kind: 'stab', calc: 'step', dose: 10, doseUnit: 'g', step: 10, pack: 'Seau 5 kg', packSize: 5, packUnit: 'kg', price: null },
+  'sel': { name: 'Sel piscine', kind: 'sel', calc: 'step', dose: 1, doseUnit: 'kg', step: 1, pack: 'Sac 25 kg', packSize: 25, packUnit: 'kg', price: null },
+  'galet': { name: 'Galets de chlore 250 g', kind: 'galet', calc: 'none', dose: null, doseUnit: 'g', step: null, pack: 'Seau 5 kg', packSize: 5, packUnit: 'kg', price: null },
+  'chlore-liquide': { name: 'Chlore liquide', kind: 'liquide', calc: 'none', dose: null, doseUnit: 'ml', step: null, pack: 'Bidon 20 L', packSize: 20, packUnit: 'L', price: null }
+};
+async function seedIfEmpty() {
+  if (LocalDB.size() > 0) return;
+  await Promise.all([...Object.entries(DEFAULT_PRODUCTS).map(([id, d]) => LocalDB.doc('products/' + id).set(d)), LocalDB.doc('settings/main').set(DEFAULTS)]);
+}
+const blobToB64 = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = rej; r.readAsDataURL(blob); });
+const fmtBytes = b => b >= 1048576 ? `${nf(b / 1048576, 1)} Mo` : `${nf(b / 1024, 0)} Ko`;
+const daysSince = iso => iso ? Math.floor((Date.now() - new Date(iso).getTime()) / 864e5) : null;
+function backupAge() { const d = daysSince(settings().lastBackup); return d == null ? 'jamais' : d === 0 ? 'aujourd’hui' : d === 1 ? 'hier' : `il y a ${d} jours`; }
+function openBackup() {
+  const el = openSheet({
+    title: 'Sauvegarde',
+    html: `<div class="form">
+      <div class="callout info"><b>Tes données ne sont que sur ce téléphone.</b><p>Si l’appli est supprimée ou si iOS efface ses données, seule une sauvegarde te permet de tout récupérer. Range le fichier dans Fichiers, sur iCloud Drive.</p></div>
+      <fieldset><legend>Créer une sauvegarde</legend>
+        <p class="muted">Dernière sauvegarde : ${backupAge()}</p>
+        <label class="check"><input type="checkbox" id="bk-photos" checked> Inclure les photos (fichier plus lourd)</label>
+        <button type="button" class="btn primary" data-v="prepare" style="justify-self:start">Préparer la sauvegarde</button>
+        <div id="bk-ready"></div>
+      </fieldset>
+      <fieldset><legend>Restaurer une sauvegarde</legend>
+        <p class="hint">Remplace toutes les données de ce téléphone par celles du fichier.</p>
+        <input type="file" id="bk-file" accept=".json,application/json" hidden>
+        <button type="button" class="btn" data-v="pick" style="justify-self:start">Choisir un fichier de sauvegarde</button>
+        <div id="bk-import"></div>
+      </fieldset>
+    </div>`
+  });
+  let prepared = null, incoming = null;
+  el.addEventListener('click', async e => {
+    const b = e.target.closest('[data-v]'); if (!b) return;
+    const a = b.dataset.v;
+    if (a === 'prepare') {
+      b.disabled = true; b.textContent = 'Préparation…';
+      try {
+        const withPhotos = $('#bk-photos', el).checked, blobs = {};
+        if (withPhotos) for (const id of await LocalDB.blobKeys()) { const bl = await LocalDB.getBlob(id); if (bl) blobs[id] = { type: bl.type || 'image/jpeg', b64: await blobToB64(bl) }; }
+        const json = JSON.stringify({ app: 'tournee-piscines', format: 1, exportedAt: new Date().toISOString(), docs: LocalDB.dump(), blobs });
+        prepared = { name: `tournee-sauvegarde-${today()}.json`, data: new Blob([json], { type: 'application/json' }) };
+        $('#bk-ready', el).innerHTML = `<div class="result"><span>Sauvegarde prête</span><b>${fmtBytes(prepared.data.size)}</b><small>${Object.keys(blobs).length} photo${Object.keys(blobs).length > 1 ? 's' : ''} incluse${Object.keys(blobs).length > 1 ? 's' : ''}</small></div><button type="button" class="btn primary" data-v="share" style="margin-top:10px">Enregistrer le fichier</button>`;
+      } catch (err) { toast('Sauvegarde impossible : ' + ((err && err.message) || 'erreur'), true); }
+      finally { b.disabled = false; b.textContent = 'Préparer à nouveau'; }
+    } else if (a === 'share' && prepared) {
+      try { await downloads.save({ filename: prepared.name, data: prepared.data }); await db.doc('settings/main').set(strip(merge(settings(), { lastBackup: new Date().toISOString() }))); toast('Sauvegarde enregistrée'); }
+      catch (err) { if (!err || err.code !== 'declined') toast('Enregistrement impossible', true); }
+    } else if (a === 'pick') $('#bk-file', el).click();
+    else if (a === 'restore' && incoming) {
+      if (!armed(b, 'Confirmer : remplacer mes données')) return;
+      b.disabled = true; b.textContent = 'Restauration…';
+      try { await LocalDB.restore(incoming); location.reload(); }
+      catch (err) { toast('Restauration impossible : ' + ((err && err.message) || 'erreur'), true); b.disabled = false; }
+    }
+  });
+  $('#bk-file', el).addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0]; if (!file) return;
+    const box = $('#bk-import', el);
+    try {
+      const obj = JSON.parse(await file.text());
+      if (!obj || obj.app !== 'tournee-piscines' || !obj.docs) throw new Error('Ce fichier n’est pas une sauvegarde de Tournée.');
+      incoming = obj;
+      const n = pre => Object.keys(obj.docs).filter(k => k.startsWith(pre + '/')).length;
+      box.innerHTML = `<div class="result"><span>${esc(file.name)}${obj.exportedAt ? ' · ' + new Date(obj.exportedAt).toLocaleDateString('fr-FR') : ''}</span><b>${n('pools')} fiche${n('pools') > 1 ? 's' : ''}</b><small>${n('visits')} passage${n('visits') > 1 ? 's' : ''} · ${n('products')} produits · ${Object.keys(obj.blobs || {}).length} photo${Object.keys(obj.blobs || {}).length > 1 ? 's' : ''}</small></div>${LocalDB.size() ? '<p class="hint">Les données actuelles de ce téléphone seront remplacées.</p>' : ''}<button type="button" class="btn primary" data-v="restore" style="margin-top:10px">Restaurer cette sauvegarde</button>`;
+    } catch (err) { incoming = null; box.innerHTML = `<p class="errors">${esc((err && err.message) || 'Fichier illisible')}</p>`; }
+    finally { e.target.value = ''; }
+  });
+}
+
+/* ---------- Démarrage ---------- */
+async function boot() {
+  applyHash();
+  render();
+  try { await LocalDB.init(); } catch { S.error = 'nodb'; render(); return; }
+  db = LocalDB; assets = assetsLocal; downloads = downloadsLocal;
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().then(p => { S.persisted = p; }); } catch { }
+  try { if (navigator.storage && navigator.storage.estimate) navigator.storage.estimate().then(est => { S.usage = est.usage; schedule(); }); } catch { }
+  try { await seedIfEmpty(); } catch { }
+  const keys = ['pools', 'products', 'settings', 'stops', 'visits', 'needs', 'lines', 'invoiced'];
+  const seen = new Set(), confirmed = new Set();
+  const timer = setTimeout(() => { if (!S.synced) { S.slow = true; schedule(); } }, 10000);
+  const mark = (k, meta) => {
+    seen.add(k); if (!meta || !meta.fromCache) confirmed.add(k);
+    S.ready = seen.size === keys.length;
+    if (confirmed.size === keys.length) { S.synced = true; S.slow = false; clearTimeout(timer); }
+    schedule();
+  };
+  const fail = e => { S.error = (e && e.code) || 'unavailable'; clearTimeout(timer); schedule(); };
+  const col = (k, q) => q.onSnapshot(snap => { const o = {}; snap.docs.forEach(d => { o[d.id] = { id: d.id, ...d.data() }; }); S[k] = o; mark(k, snap.metadata); }, fail);
+  col('pools', db.collection('pools'));
+  col('products', db.collection('products'));
+  col('stops', db.collection('stops').where('date', '>=', STOPS_FROM));
+  col('visits', db.collection('visits').where('date', '>=', VISITS_FROM));
+  col('needs', db.collection('needs'));
+  col('lines', db.collection('lines').where('month', '>=', LINES_FROM));
+  col('invoiced', db.collection('invoiced'));
+  db.doc('settings/main').onSnapshot(d => { S.settingsDoc = d.exists ? d.data() : null; mark('settings', d.metadata); }, fail);
+}
+
+/* ---------- Rendu ---------- */
+let pending = false, dirty = false, drag = null;
+const WIDE = matchMedia('(min-width: 1180px)');
+WIDE.addEventListener('change', () => schedule());
+function schedule() { if (pending) return; pending = true; requestAnimationFrame(render); }
+function render() {
+  pending = false;
+  if (drag) return;
+  const view = $('#view');
+  const ae = document.activeElement;
+  if (ae && view.contains(ae) && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) { dirty = true; return; }
+  dirty = false;
+  const sync = $('#sync');
+  sync.className = 'sync ' + (S.error ? 'bad' : S.synced ? 'ok' : '');
+  sync.textContent = S.error ? 'Erreur de stockage' : (navigator.onLine === false ? 'Hors ligne · local' : 'Enregistré sur ce téléphone');
+  $('#tabname').textContent = TABS[UI.tab];
+  $$('.tabs button').forEach(b => b.setAttribute('aria-current', b.dataset.tab === UI.tab ? 'page' : 'false'));
+  const nc = openNeeds().length, cnt = $('#needcount'); cnt.hidden = !nc; cnt.textContent = nc;
+  if (S.error === 'nodb') { view.innerHTML = `<div class="empty-state"><h2>Stockage local indisponible</h2><p>Ouvre l’appli depuis son icône sur l’écran d’accueil, hors navigation privée. Les données sont enregistrées dans ce stockage.</p></div>`; return; }
+  if (!S.ready) { view.innerHTML = `<p class="loading">Chargement de tes données…${S.slow ? '<br>Ça prend plus de temps que prévu : vérifie ta connexion.' : ''}${S.error ? '<br>Connexion aux données impossible pour le moment.' : ''}</p>`; return; }
+  const banner = S.error ? `<div class="banner">Le stockage local ne répond pas. Ferme et rouvre l’appli.</div>` : '';
+  const fn = { planning: viewPlanning, piscines: viewPools, besoins: viewNeeds, facturation: viewBilling, reglages: viewSettings }[UI.tab] || viewPlanning;
+  view.innerHTML = banner + fn();
+  hydrate(view);
+}
+$('#view').addEventListener('focusout', () => { if (dirty) setTimeout(schedule, 0); });
+
+function setTab(t) { if (!TABS[t]) t = 'planning'; UI.tab = t; if (t !== 'piscines') UI.poolId = null; try { if (location.hash !== '#' + t) history.replaceState(null, '', '#' + t); } catch { } render(); window.scrollTo(0, 0); }
+function applyHash() { const h = (location.hash || '').slice(1); if (TABS[h]) UI.tab = h; }
+window.addEventListener('hashchange', () => { applyHash(); render(); });
+
+/* ---------- Pastilles de mesures ---------- */
+function valueChips(v) {
+  const th = settings().th;
+  const c = (k, label, val, d, unit, sw) => {
+    if (val == null) return '';
+    const s = L.status(val, th[k]) || '';
+    return `<span class="chip s-${s}">${sw ? `<i class="sw" style="background:${sw}"></i>` : ''}${label} ${nf(val, d)}${unit ? ` <small>${unit}</small>` : ''}</span>`;
+  };
+  return `<span class="chips">${c('ph', 'pH', v.ph, 1, '', swatch(PH_SCALE, v.ph))}${c('cl', 'Cl', v.cl, 1, '', swatch(DPD_SCALE, v.cl))}${c('tac', 'TAC', v.tac, 0)}${c('cya', 'Stab', v.cya, 0)}${v.redox != null ? c('redox', 'Redox', v.redox, 0, 'mV') : ''}</span>`;
+}
+
+/* ========== PLANNING ========== */
+function scheduleFor(date) {
+  const st = settings(), list = dayStops(date);
+  const sch = L.schedule(list.map(s => { const p = S.pools[s.poolId]; return { id: s.id, gps: p && p.gps || null, duration: s.duration || (p && p.duration) || 40 }; }), st, date);
+  return { list, sch };
+}
+function mapsUrl(list) {
+  const st = settings();
+  const pts = list.map(s => S.pools[s.poolId]).filter(Boolean).map(p => p.gps ? `${p.gps.lat},${p.gps.lng}` : p.address).filter(Boolean);
+  if (!pts.length) return '';
+  const origin = st.startGps ? `${st.startGps.lat},${st.startGps.lng}` : (st.startAddress || '');
+  let u = 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' + encodeURIComponent(pts[pts.length - 1]);
+  if (origin) u += '&origin=' + encodeURIComponent(origin);
+  if (pts.length > 1) u += '&waypoints=' + encodeURIComponent(pts.slice(0, -1).join('|'));
+  return u;
+}
+function viewPlanning() {
+  const st = settings(), days = L.weekDays(UI.week), t = today();
+  if (!days.includes(UI.day)) UI.day = days.includes(t) ? t : days[0];
+  const d0 = L.parse(days[0]), d6 = L.parse(days[6]);
+  const range = `${d0.getDate()} ${MONTHS_S[d0.getMonth()]} – ${d6.getDate()} ${MONTHS_S[d6.getMonth()]}`;
+  let h = `<div class="weekbar">
+    <div class="weeknav"><button class="icon-btn" data-action="week" data-delta="-7" aria-label="Semaine précédente">${ICON.left}</button>
+      <div class="weektitle"><strong>Semaine ${L.isoWeek(UI.week)}</strong><span>${range}</span></div>
+      <button class="icon-btn" data-action="week" data-delta="7" aria-label="Semaine suivante">${ICON.right}</button></div>
+    <div class="weekactions">${days.includes(t) ? '' : '<button class="btn ghost sm" data-action="week-today">Cette semaine</button>'}<button class="btn sm primary" data-action="fill-week">Remplir la semaine</button></div>
+  </div>`;
+  if (days.includes(t)) {
+    const seen = new Set();
+    const rem = dayStops(t).filter(s => s.status !== 'fait').map(s => S.pools[s.poolId]).filter(p => p && p.pendingNote && p.pendingNote.text && !seen.has(p.id) && seen.add(p.id));
+    if (rem.length) h += `<section class="reminders"><h3>Rappels du jour</h3><ul>${rem.map(p => `<li><strong>${esc(p.name)} :</strong> ${esc(p.pendingNote.text)}</li>`).join('')}</ul></section>`;
+  }
+  if (!pools().length) {
+    h += `<div class="empty-state"><h2>Ton planning est vide</h2><p>Si tu as un fichier de sauvegarde, restaure-le pour retrouver tes fiches. Sinon, crée tes fiches piscines avec leur fréquence et leurs jours préférés : « Remplir la semaine » placera chaque client, et tu ajusteras en glissant les cartes.</p><div class="row-actions"><button class="btn primary" data-action="backup">Restaurer une sauvegarde</button><button class="btn" data-action="new-pool">Créer une fiche piscine</button></div></div>`;
+    return h;
+  }
+  { const d = daysSince(st.lastBackup); if (d == null || d > 14) h += `<div class="callout"><b>Dernière sauvegarde : ${backupAge()}</b><p>Tes données ne sont que sur ce téléphone. Fais une sauvegarde au moins toutes les deux semaines.</p><button class="btn sm" data-action="backup" style="justify-self:start">Sauvegarder maintenant</button></div>`; }
+  if (!st.startGps) h += `<div class="callout info">Renseigne ton point de départ (coordonnées GPS) dans Réglages pour obtenir les temps de trajet et l’heure d’arrivée à chaque piscine.</div>`;
+  if (WIDE.matches) {
+    const shown = days.filter(d => (st.workDays || []).map(Number).includes(L.dow(d)) || dayStops(d).length);
+    h += `<div class="weekgrid" style="--cols:${shown.length}">${shown.map(d => dayBlock(d, true)).join('')}</div>`;
+  } else {
+    h += `<div class="daystrip">${days.map(d => { const n = dayStops(d).length; return `<button class="daychip ${d === UI.day ? 'sel' : ''} ${d === t ? 'today' : ''}" data-action="pick-day" data-date="${d}" aria-label="${dayLabel(d, true)}, ${n} passage${n > 1 ? 's' : ''}"><span>${DOW[L.dow(d)]}</span><b>${L.parse(d).getDate()}</b><i>${n || ''}</i></button>`; }).join('')}</div>`;
+    h += dayBlock(UI.day, false);
+  }
+  return h;
+}
+function dayBlock(date, compact) {
+  const { list, sch } = scheduleFor(date);
+  const done = list.filter(s => s.status === 'fait').length;
+  const maps = list.length ? mapsUrl(list) : '';
+  const stats = list.length
+    ? `${list.length} passage${list.length > 1 ? 's' : ''}${done ? ` · ${done} fait${done > 1 ? 's' : ''}` : ''}${sch.km > 0 ? ` · ${dur(sch.drive)} de route · ${nf(sch.km, 0)} km` : ''} · fin ≈ ${hm(sch.endHome)}${sch.unknown ? ` · <span style="color:var(--warn)">${sch.unknown} sans GPS</span>` : ''}`
+    : 'Aucun passage';
+  let prev = settings().startGps || null;
+  const rows = list.map((s, i) => { const p = S.pools[s.poolId]; const out = stopCard(s, sch.rows[i], prev); if (p && p.gps) prev = p.gps; return out; }).join('');
+  return `<section class="day">
+    <header class="dayhead"><div><h3>${compact ? dayLabel(date, false) : dayLabel(date, true)}${date === today() ? ' <span class="tag">Aujourd’hui</span>' : ''}</h3><p>${stats}</p></div>
+      <div class="dayact">${list.length > 1 ? `<button class="btn sm ghost" data-action="optimize" data-date="${date}">Optimiser</button>` : ''}${maps ? `<a class="btn sm ghost" href="${esc(maps)}" target="_blank" rel="noopener" title="Tournée complète avec trafic (Plans n’accepte pas plusieurs étapes par lien)">Tournée Google</a>` : ''}<button class="btn sm" data-action="add-stop" data-date="${date}">+ Ajouter</button></div></header>
+    <div class="daylist" data-date="${date}">${rows || `<p class="empty">Aucun passage. Glisse une carte ici ou ajoute une piscine.</p>`}</div>
+  </section>`;
+}
+function stopCard(s, row, prev) {
+  const p = S.pools[s.poolId], name = p ? p.name : 'Fiche supprimée';
+  const done = s.status === 'fait', v = done && s.visitId ? S.visits[s.visitId] : null;
+  const ns = p && p.pendingNote && p.pendingNote.text && !done ? nextStopOf(p.id) : null;
+  const showNote = ns && ns.id === s.id;
+  const plans = p ? plansUrl(prev, p.gps, p.address) : '';
+  let conn = '';
+  if (row && row.travel != null) conn = `<div class="conn">${ICON.car}<a href="${esc(plans)}" target="_blank" rel="noopener"><span>≈ ${dur(row.travel)} · ${nf(row.km, 1)} km</span><span class="lk">Plans</span></a></div>`;
+  else if (p && !p.gps) conn = `<div class="conn" style="color:var(--warn)">${ICON.car}<span>trajet inconnu : pas de GPS sur la fiche</span>${plans ? `<a href="${esc(plans)}" target="_blank" rel="noopener"><span class="lk">Plans</span></a>` : ''}</div>`;
+  const sub = [town(p && p.address), p && p.volume ? nf(p.volume, 0) + ' m³' : '', p ? TRT_SHORT[p.treatment] : '', row ? dur(row.duration) : ''].filter(Boolean).join(' · ');
+  return conn + `<article class="stop ${done ? 'done' : ''} ${s.priority && !done ? 'prio' : ''}" data-id="${s.id}" data-date="${s.date}">
+    <button class="handle" aria-label="Glisser pour déplacer ${esc(name)}">${ICON.grip}</button>
+    <button class="stop-main" data-action="stop" data-id="${s.id}">
+      <span class="stop-top">${row && settings().startGps ? `<span class="eta">${hm(row.arrive)}</span>` : ''}<strong>${esc(name)}</strong></span>
+      <span class="stop-sub">${esc(sub)}</span>
+      ${(s.type === 'ponctuel' || (s.priority && !done) || done) ? `<span class="badges">${s.type === 'ponctuel' ? `<span class="badge">${esc(s.label || 'Ponctuel')}</span>` : ''}${s.priority && !done ? '<span class="badge prio">Prioritaire</span>' : ''}${done ? '<span class="badge ok">Fait</span>' : ''}</span>` : ''}
+      ${showNote ? `<span class="note">À prévoir : ${esc(p.pendingNote.text)}</span>` : ''}
+      ${v ? valueChips(v) : ''}
+    </button>
+  </article>`;
+}
+
+async function moveStop(id, date, index) {
+  const s = S.stops[id]; if (!s) return;
+  const list = dayStops(date).filter(x => x.id !== id);
+  const at = Math.max(0, Math.min(index, list.length));
+  list.splice(at, 0, s);
+  const ops = [];
+  list.forEach((x, i) => {
+    if (x.id === id) { if (x.date !== date || x.order !== i) ops.push(upd('stops', id, { date, order: i })); }
+    else if (x.order !== i) ops.push(upd('stops', x.id, { order: i }));
+  });
+  if (ops.length) await run(ops, date !== s.date ? `Déplacé au ${dayLabel(date, true)}` : null);
+}
+async function optimizeDay(date) {
+  const st = settings(), list = dayStops(date);
+  const fixed = [...list.filter(s => s.status === 'fait'), ...list.filter(s => s.status !== 'fait' && s.priority)];
+  const free = list.filter(s => s.status !== 'fait' && !s.priority);
+  const withGps = free.filter(s => S.pools[s.poolId] && S.pools[s.poolId].gps);
+  const noGps = free.filter(s => !(S.pools[s.poolId] && S.pools[s.poolId].gps));
+  const lastFixed = [...fixed].reverse().find(s => S.pools[s.poolId] && S.pools[s.poolId].gps);
+  const start = lastFixed ? S.pools[lastFixed.poolId].gps : st.startGps;
+  const order = L.bestOrder(withGps.map(s => ({ id: s.id, gps: S.pools[s.poolId].gps })), start, !!st.startGps);
+  const final = [...fixed.map(s => s.id), ...order, ...noGps.map(s => s.id)];
+  const ops = [];
+  final.forEach((id, i) => { if (S.stops[id].order !== i) ops.push(upd('stops', id, { order: i })); });
+  if (!ops.length) { toast('L’ordre actuel est déjà le plus court.'); return; }
+  await run(ops, noGps.length ? `Ordre optimisé. ${noGps.length} piscine${noGps.length > 1 ? 's' : ''} sans GPS placée${noGps.length > 1 ? 's' : ''} en fin de journée.` : 'Ordre optimisé');
+}
+async function fillWeek() {
+  const st = settings(), days = L.weekDays(UI.week);
+  const plan = L.planWeek(UI.week, pools(), Object.values(S.stops), st, today());
+  if (!plan.length) { toast('Rien à ajouter : chaque client a déjà ses passages sur les jours restants de la semaine.'); return; }
+  const byDate = {};
+  plan.forEach(s => { (byDate[s.date] = byDate[s.date] || []).push(s); });
+  const ops = [], now = Date.now();
+  for (const date of Object.keys(byDate)) {
+    const existing = dayStops(date);
+    let items = byDate[date];
+    if (!existing.length) {
+      const g = items.filter(s => S.pools[s.poolId].gps), ng = items.filter(s => !S.pools[s.poolId].gps);
+      g.forEach((s, i) => { s._k = 'k' + i; });
+      const ord = L.bestOrder(g.map(s => ({ id: s._k, gps: S.pools[s.poolId].gps })), st.startGps, !!st.startGps);
+      items = [...ord.map(k => g.find(s => s._k === k)), ...ng];
+    }
+    const base = existing.length ? Math.max(...existing.map(s => s.order ?? 0)) + 1 : 0;
+    items.forEach((s, i) => { delete s._k; ops.push(put('stops', uid(), { ...s, order: base + i, createdAt: now + i })); });
+  }
+  await run(ops, `${plan.length} passage${plan.length > 1 ? 's' : ''} ajouté${plan.length > 1 ? 's' : ''} à la semaine`);
+}
+
+/* ----- Glisser-déposer (souris et tactile) ----- */
+document.addEventListener('pointerdown', e => {
+  const h = e.target.closest('.handle'); if (!h || e.button > 0) return;
+  const card = h.closest('.stop'); if (!card) return;
+  e.preventDefault();
+  const r = card.getBoundingClientRect();
+  const ghost = card.cloneNode(true); ghost.classList.add('ghost-card'); ghost.classList.remove('dragging');
+  Object.assign(ghost.style, { width: r.width + 'px', left: r.left + 'px', top: r.top + 'px' });
+  document.body.appendChild(ghost);
+  card.classList.add('dragging');
+  drag = { id: card.dataset.id, ghost, card, dx: e.clientX - r.left, dy: e.clientY - r.top, target: null, raf: null, y: e.clientY };
+  window.addEventListener('pointermove', onDragMove, { passive: false });
+  window.addEventListener('pointerup', onDragEnd);
+  window.addEventListener('pointercancel', onDragCancel);
+});
+function clearMarks() { $$('.drop,.drop-before,.drop-after').forEach(el => el.classList.remove('drop', 'drop-before', 'drop-after')); }
+function onDragMove(e) {
+  if (!drag) return;
+  e.preventDefault();
+  drag.ghost.style.left = (e.clientX - drag.dx) + 'px';
+  drag.ghost.style.top = (e.clientY - drag.dy) + 'px';
+  drag.y = e.clientY;
+  clearMarks();
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const chip = el && el.closest('.daychip');
+  const card = el && el.closest('.stop:not(.dragging)');
+  const list = el && el.closest('.daylist');
+  drag.target = null;
+  if (chip) { chip.classList.add('drop'); drag.target = { date: chip.dataset.date, index: Infinity }; }
+  else if (card && card.dataset.date) {
+    const rr = card.getBoundingClientRect(), after = e.clientY > rr.top + rr.height / 2;
+    card.classList.add(after ? 'drop-after' : 'drop-before');
+    const ids = dayStops(card.dataset.date).filter(s => s.id !== drag.id).map(s => s.id);
+    drag.target = { date: card.dataset.date, index: ids.indexOf(card.dataset.id) + (after ? 1 : 0) };
+  } else if (list) { list.classList.add('drop'); drag.target = { date: list.dataset.date, index: Infinity }; }
+  if (!drag.raf) {
+    const tick = () => { if (!drag) return; const y = drag.y; if (y < 110) window.scrollBy(0, -10); else if (y > window.innerHeight - 130) window.scrollBy(0, 10); drag.raf = requestAnimationFrame(tick); };
+    drag.raf = requestAnimationFrame(tick);
+  }
+}
+function endDrag() {
+  window.removeEventListener('pointermove', onDragMove); window.removeEventListener('pointerup', onDragEnd); window.removeEventListener('pointercancel', onDragCancel);
+  if (!drag) return null;
+  cancelAnimationFrame(drag.raf); drag.ghost.remove(); drag.card.classList.remove('dragging'); clearMarks();
+  const d = drag; drag = null; return d;
+}
+function onDragEnd() { const d = endDrag(); if (d && d.target) moveStop(d.id, d.target.date, d.target.index); else schedule(); }
+function onDragCancel() { endDrag(); schedule(); }
+
+/* ----- Feuilles (panneaux) ----- */
+let sheetEl = null;
+function openSheet({ title, html, foot = '' }) {
+  const root = $('#sheet-root');
+  root.innerHTML = `<div class="backdrop" data-close></div><section class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}"><header class="sheet-h"><h2>${esc(title)}</h2><button class="icon-btn" data-close aria-label="Fermer">${ICON.x}</button></header><div class="sheet-b">${html}</div>${foot ? `<footer class="sheet-f">${foot}</footer>` : ''}</section>`;
+  root.hidden = false; document.documentElement.classList.add('locked');
+  sheetEl = root.querySelector('.sheet');
+  hydrate(sheetEl);
+  setTimeout(() => { const f = sheetEl && sheetEl.querySelector('.sheet-h .icon-btn'); if (f) f.focus({ preventScroll: true }); }, 0);
+  return sheetEl;
+}
+function closeSheet() { const root = $('#sheet-root'); root.innerHTML = ''; root.hidden = true; document.documentElement.classList.remove('locked'); sheetEl = null; schedule(); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheetEl) closeSheet(); });
+$('#sheet-root').addEventListener('click', e => {
+  if (e.target.closest('[data-close]')) { closeSheet(); return; }
+  const sb = e.target.closest('.st-btn');
+  if (sb) { const box = sb.closest('.stepper'); stepTo(box, +box.querySelector('input[type=hidden]').value + +sb.dataset.step); }
+});
+$('#sheet-root').addEventListener('input', e => {
+  if (!e.target.classList.contains('st-range')) return;
+  e.stopPropagation();
+  stepTo(e.target.closest('.stepper'), +e.target.value);
+}, true);
+
+/* ----- Passage : actions ----- */
+function openStop(id) {
+  const s = S.stops[id]; if (!s) return;
+  const p = S.pools[s.poolId], done = s.status === 'fait';
+  const days = L.weekDays(L.mondayOf(s.date));
+  const navUrl = p ? plansUrl(null, p.gps, p.address) : '';
+  const el = openSheet({
+    title: p ? p.name : 'Passage',
+    html: `<div class="form">
+      <p class="muted">${dayLabel(s.date, true)} · ${s.type === 'ponctuel' ? esc(s.label || 'Intervention ponctuelle') : 'Entretien'}${p && p.address ? ' · ' + esc(p.address) : ''}</p>
+      ${p && p.pendingNote && p.pendingNote.text && !done ? `<div class="callout"><b>À prévoir</b><p>${esc(p.pendingNote.text)}</p></div>` : ''}
+      <div class="menu">
+        ${done ? `<button class="btn primary block" data-v="see">Voir le passage</button>` : `<button class="btn primary block" data-v="validate">Valider le passage</button>`}
+        ${done ? '' : `<button class="btn block" data-v="prio">${s.priority ? 'Retirer la priorité' : 'Marquer prioritaire (en tête de journée)'}</button>`}
+        ${p ? `<button class="btn block" data-v="pool">Ouvrir la fiche piscine</button>` : ''}
+        ${navUrl ? `<a class="btn ghost block" href="${esc(navUrl)}" target="_blank" rel="noopener">Itinéraire dans Plans</a>` : ''}
+      </div>
+      ${done ? '' : `<fieldset><legend>Déplacer</legend>
+        <div class="daybtns">${days.map(d => `<button type="button" class="btn sm ${d === s.date ? 'primary' : 'ghost'}" data-v="move" data-date="${d}">${DOW[L.dow(d)]} ${L.parse(d).getDate()}</button>`).join('')}</div>
+        <div class="grid2"><label class="f"><span>Autre date</span><input type="date" id="mv-date" value="${s.date}"></label><button type="button" class="btn" data-v="move-date" style="align-self:end">Déplacer à cette date</button></div>
+      </fieldset>
+      <button class="btn ghost danger" data-v="remove">Retirer du planning</button>`}
+    </div>`
+  });
+  el.addEventListener('click', async e => {
+    const b = e.target.closest('[data-v]'); if (!b) return;
+    const a = b.dataset.v;
+    if (a === 'validate') { closeSheet(); openValidation(id); }
+    else if (a === 'see') { closeSheet(); openVisit(s.visitId); }
+    else if (a === 'pool') { closeSheet(); UI.poolId = s.poolId; setTab('piscines'); }
+    else if (a === 'prio') {
+      if (s.priority) await run(upd('stops', id, { priority: false }), 'Priorité retirée');
+      else { const min = Math.min(0, ...dayStops(s.date).map(x => x.order ?? 0)); await run(upd('stops', id, { priority: true, order: min - 1 }), 'Passage prioritaire placé en tête'); }
+      closeSheet();
+    }
+    else if (a === 'move') { closeSheet(); if (b.dataset.date !== s.date) moveStop(id, b.dataset.date, Infinity); }
+    else if (a === 'move-date') { const d = $('#mv-date', el).value; if (!d) return; closeSheet(); if (d !== s.date) moveStop(id, d, Infinity); }
+    else if (a === 'remove') { if (!armed(b, 'Confirmer le retrait')) return; closeSheet(); await run(del('stops', id), 'Retiré du planning'); }
+  });
+}
+function openAddStop(date) {
+  const list = pools();
+  if (!list.length) { toast('Crée d’abord une fiche piscine.', true); return; }
+  const el = openSheet({
+    title: 'Ajouter un passage',
+    html: `<form class="form" id="as-form" novalidate>
+      <label class="f"><span>Piscine</span><select name="poolId">${list.map(p => `<option value="${p.id}">${esc(p.name)}${town(p.address) ? ' · ' + esc(town(p.address)) : ''}</option>`).join('')}</select></label>
+      <label class="f"><span>Date</span><input type="date" name="date" value="${date}"></label>
+      <div class="seg"><label><input type="radio" name="type" value="entretien" checked> Entretien</label><label><input type="radio" name="type" value="ponctuel"> Ponctuel</label></div>
+      <label class="f" id="as-label" hidden><span>Intervention</span><select name="label">${PONCTUELS.map(x => `<option>${x}</option>`).join('')}</select></label>
+      <label class="check"><input type="checkbox" name="priority"> Passage prioritaire (placé en tête de journée)</label>
+    </form>`,
+    foot: `<button class="btn primary" data-v="save">Ajouter au planning</button>`
+  });
+  const f = $('#as-form', el);
+  f.addEventListener('change', () => { $('#as-label', el).hidden = f.elements.type.value !== 'ponctuel'; });
+  el.addEventListener('click', async e => {
+    if (!e.target.closest('[data-v="save"]')) return;
+    const d = f.elements.date.value || date, prio = f.elements.priority.checked, type = f.elements.type.value;
+    const ex = dayStops(d);
+    const order = prio ? Math.min(0, ...ex.map(x => x.order ?? 0)) - 1 : (ex.length ? Math.max(...ex.map(x => x.order ?? 0)) + 1 : 0);
+    const doc = { poolId: f.elements.poolId.value, date: d, type, priority: prio, status: 'prevu', order, createdAt: Date.now() };
+    if (type === 'ponctuel') doc.label = f.elements.label.value;
+    closeSheet();
+    await run(put('stops', uid(), doc), 'Passage ajouté');
+  });
+}
+
+/* ----- Validation d'un passage ----- */
+function mField(name, label, unit, hint) {
+  return `<label class="mfield" data-param="${name}"><span class="ml">${label}${unit ? ` <small>${unit}</small>` : ''}</span><span class="mi"><input name="${name}" id="v-${name}" inputmode="decimal" autocomplete="off"><i class="sw" hidden></i></span><span class="mh">${hint}</span></label>`;
+}
+function prodOptions(sel) {
+  const list = products();
+  return `<option value="">Choisir…</option>` + list.map(p => `<option value="${p.id}" ${p.id === sel ? 'selected' : ''}>${esc(p.name)}</option>`).join('');
+}
+function rowsHtml(list, kind) {
+  if (!list.length) return `<p class="hint">${kind === 'prod' ? 'Aucun produit ajouté.' : 'Aucun besoin ajouté.'}</p>`;
+  return list.map((r, i) => {
+    const p = S.products[r.productId];
+    const priceTxt = p ? (p.price != null ? `× ${eur(p.price)}` : '<span style="color:var(--warn)">prix à renseigner</span>') : '';
+    if (kind === 'prod') return `<div class="prow" data-i="${i}" data-kind="prod">
+      <select data-f="productId" aria-label="Produit">${prodOptions(r.productId)}</select>
+      <label class="f"><span>Quantité utilisée${p && p.packUnit ? ` (${esc(p.packUnit)})` : ''} <small>facultatif</small></span><input data-f="used" inputmode="decimal" value="${esc(String(r.used ?? '').replace('.', ','))}"></label>
+      <div class="rowbill"><span>Facturer</span>${stepper({ attr: 'data-f="packs"', value: r.packs || 0, min: 0, max: 20, label: 'Conditionnements facturés' })}<span>${esc(p ? packName(p) : 'conditionnement')} ${priceTxt}</span></div>
+      <button type="button" class="icon-btn" data-v="row-del" aria-label="Retirer">${ICON.x}</button>
+    </div>`;
+    return `<div class="prow" data-i="${i}" data-kind="need">
+      <select data-f="productId" aria-label="Produit">${prodOptions(r.productId)}</select>
+      <div class="rowbill">${stepper({ attr: 'data-f="packs"', value: r.packs || 1, min: 1, max: 20, label: 'Conditionnements à acheter' })}<span>${esc(p ? packName(p) : 'conditionnement')}</span></div>
+      <input data-f="note" value="${esc(r.note || '')}" placeholder="Note (facultatif)" aria-label="Note">
+      <button type="button" class="icon-btn" data-v="row-del" aria-label="Retirer">${ICON.x}</button>
+    </div>`;
+  }).join('');
+}
+function analyze(vals, p, hist, st) {
+  const th = st.th, alerts = [], sugg = [];
+  const V = +p.volume || null;
+  if (vals.ph != null) {
+    if (vals.ph > th.ph.max) sugg.push({ kind: 'ph_minus', param: 'ph', current: vals.ph, target: th.ph.target });
+    else if (vals.ph < th.ph.min) sugg.push({ kind: 'ph_plus', param: 'ph', current: vals.ph, target: th.ph.target });
+  }
+  if (vals.tac != null) {
+    if (vals.tac < th.tac.min) sugg.push({ kind: 'tac_plus', param: 'tac', current: vals.tac, target: th.tac.target });
+    else if (vals.tac > th.tac.max) alerts.push({ level: 'warn', text: `TAC élevé (${nf(vals.tac, 0)} ppm) : il tire le pH vers le haut en permanence. Baisse-le progressivement avec du pH moins.` });
+  }
+  if (vals.cya != null) {
+    if (vals.cya > th.cya.alertMax) {
+      const pct = L.drainPct(vals.cya, th.cya.target);
+      alerts.push({ level: 'bad', text: `Stabilisant à ${nf(vals.cya, 0)} ppm : le chlore est bloqué. Vidange partielle d’environ ${nf(pct * 100, 0)} %${V ? ` (≈ ${nf(pct * V, 0)} m³)` : ''} pour revenir à ${th.cya.target} ppm.` });
+    } else if (vals.cya > th.cya.max) alerts.push({ level: 'warn', text: `Stabilisant à ${nf(vals.cya, 0)} ppm : il faut plus de chlore libre pour la même efficacité.${p.treatment === 'galets' ? ' Les galets continuent d’en ajouter.' : ''}` });
+    else if (vals.cya < th.cya.min && p.treatment !== 'galets') sugg.push({ kind: 'stab', param: 'cya', current: vals.cya, target: th.cya.target });
+  }
+  if (vals.cl != null && vals.cya != null && vals.cya > 0) {
+    const minFc = 0.075 * vals.cya;
+    if (vals.cl < minFc) alerts.push({ level: 'bad', text: `Avec ${nf(vals.cya, 0)} ppm de stabilisant, il faut au moins ${nf(minFc, 1)} ppm de chlore libre (7,5 % du stabilisant) pour que la désinfection tienne.` });
+  }
+  if (vals.cl != null && vals.cl < th.cl.alertMin) sugg.push({ kind: 'choc', current: vals.cl });
+  if (p.treatment === 'electrolyseur') {
+    if (vals.prod != null && vals.cl != null && vals.cl < th.cl.min && (p.elecUnit || '%') === '%' && vals.prod >= 90) alerts.push({ level: 'warn', text: 'Électrolyseur presque au maximum avec un chlore bas : contrôle l’entartrage de la cellule et le taux de sel.' });
+    if (vals.sel != null && vals.sel < th.sel.min) sugg.push({ kind: 'sel', param: 'sel', current: vals.sel, target: th.sel.target });
+  }
+  if (p.treatment === 'liquide' && vals.redox != null && vals.cl != null && L.status(vals.redox, th.redox) === 'ok' && vals.cl < th.cl.min) alerts.push({ level: 'warn', text: 'Redox dans la plage mais chlore libre bas : vérifie l’étalonnage de la sonde redox et le pH (un pH haut fait chuter le redox réel).' });
+  const series = [...hist.map(h => ({ ph: h.ph, cl: h.cl, cya: h.cya })), { ph: vals.ph, cl: vals.cl, cya: vals.cya }];
+  alerts.push(...L.trends(series, th, p.treatment));
+  const out = sugg.map(sg => {
+    const prod = productOfKind(sg.kind);
+    if (!prod) return { ...sg, missing: true };
+    let q = null, how = '';
+    if (prod.calc === 'fixe') { q = L.doseFixed(+prod.dose, V); how = `${nf(prod.dose, 1)} ${prod.doseUnit || 'g'}/m³ × ${nf(V, 0)} m³ (traitement choc)`; }
+    else if (prod.calc === 'step') {
+      q = L.doseStep(+prod.dose, +prod.step, sg.current, sg.target, V);
+      const pl = PARAMS[sg.param];
+      how = `${pl.label} ${nf(sg.current, pl.d)} → ${nf(sg.target, pl.d)} sur ${nf(V, 0)} m³`;
+    }
+    return { ...sg, prod, q, how, pk: L.packsFor(prod, q) };
+  });
+  return { alerts, sugg: out };
+}
+async function stampPhoto(file, label) {
+  let src = null, w, h, objUrl = null;
+  try { src = await createImageBitmap(file); w = src.width; h = src.height; }
+  catch {
+    objUrl = URL.createObjectURL(file);
+    src = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = objUrl; });
+    w = src.naturalWidth; h = src.naturalHeight;
+  }
+  const sc = Math.min(1, 1600 / Math.max(w, h)), cw = Math.round(w * sc), ch = Math.round(h * sc);
+  const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+  const x = c.getContext('2d'); x.drawImage(src, 0, 0, cw, ch);
+  if (objUrl) URL.revokeObjectURL(objUrl);
+  const when = new Date(file.lastModified || Date.now());
+  const txt = `${label} · ${when.toLocaleDateString('fr-FR')} ${when.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+  const fs = Math.max(16, Math.round(cw / 38)), pd = Math.round(fs * 0.55);
+  x.font = `600 ${fs}px Barlow, system-ui, sans-serif`;
+  const tw = x.measureText(txt).width;
+  x.fillStyle = 'rgba(0,0,0,.58)'; x.fillRect(0, ch - fs - pd * 2, Math.min(cw, tw + pd * 2), fs + pd * 2);
+  x.fillStyle = '#ffffff'; x.textBaseline = 'middle'; x.fillText(txt, pd, ch - pd - fs / 2);
+  const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.82));
+  return { blob, at: when.toISOString() };
+}
+
+function openValidation(stopId) {
+  const s = S.stops[stopId]; if (!s) return;
+  const p = S.pools[s.poolId]; if (!p) { toast('Fiche piscine introuvable.', true); return; }
+  const st = settings(), hist = poolVisits(p.id), tr = p.treatment || 'electrolyseur';
+  const state = { type: s.type || 'entretien', photo: null, uploading: false, products: [], needs: [], sugg: [] };
+  const vDate = s.date <= today() ? s.date : today();
+  const eqAlerts = (p.equipment || []).map(e => ({ e, d: L.equipDue(e, st.equipLife[EQUIP[e.type] && EQUIP[e.type].life], L.ym(today())) })).filter(x => x.d && x.d.level !== 'ok');
+  const html = `<form class="form" id="vform" novalidate>
+    <div class="seg" role="radiogroup" aria-label="Type de passage"><label><input type="radio" name="type" value="entretien" ${state.type === 'entretien' ? 'checked' : ''}> Entretien</label><label><input type="radio" name="type" value="ponctuel" ${state.type === 'ponctuel' ? 'checked' : ''}> Intervention ponctuelle</label></div>
+    ${p.pendingNote && p.pendingNote.text ? `<div class="callout"><b>Rappel du dernier passage</b><p>${esc(p.pendingNote.text)}</p><label class="check"><input type="checkbox" name="noteDone"> C’est fait, retirer le rappel</label></div>` : ''}
+    ${eqAlerts.length ? `<div class="callout">${eqAlerts.map(x => `<p><b>${esc(EQUIP[x.e.type] ? EQUIP[x.e.type].label : x.e.type)}</b> : remplacement ${x.d.left < 0 ? 'dépassé depuis' : 'prévu en'} ${monthLabel(x.d.due)}</p>`).join('')}</div>` : ''}
+    <fieldset id="ponct-box" ${state.type === 'ponctuel' ? '' : 'hidden'}><legend>Intervention</legend>
+      <div class="grid2"><label class="f" data-req="label"><span>Type d’intervention</span><select name="label">${PONCTUELS.map(x => `<option ${x === s.label ? 'selected' : ''}>${x}</option>`).join('')}</select></label>
+      <label class="f"><span>Précision <small>(facultatif)</small></span><input name="labelMore" placeholder="Ex. : changement joint de pompe"></label></div>
+    </fieldset>
+    <fieldset><legend>Constantes <small class="hint" id="const-opt" ${state.type === 'ponctuel' ? '' : 'hidden'}>(facultatives en ponctuel)</small></legend>
+      <div class="mgrid">${mField('cl', 'Chlore libre', 'ppm', 'pastille DPD 1')}${mField('ph', 'pH', '', 'rouge de phénol')}${mField('tac', 'TAC', 'ppm', 'bandelette')}${mField('cya', 'Stabilisant', 'ppm', 'bandelette')}</div>
+    </fieldset>
+    <fieldset><legend>${TRAITEMENT[tr]}</legend>
+      <div class="mgrid">
+      ${tr === 'electrolyseur' ? mField('prod', 'Production', p.elecUnit || '%', 'lue sur le boîtier') + mField('sel', 'Sel', 'g/L', 'facultatif') : ''}
+      ${tr === 'liquide' ? mField('redox', 'Redox', 'mV', 'lu sur le régulateur') : ''}
+      ${tr === 'galets' ? mField('galets', 'Galets ajoutés', 'nb', 'dans le skimmer ou le diffuseur') : ''}
+      </div>
+    </fieldset>
+    <div id="analysis" class="alerts"></div>
+    <fieldset><legend>Produits utilisés</legend><p class="hint">La quantité utilisée sert à l’historique. Ne facture des conditionnements que s’ils sortent de ton stock : un produit acheté via Besoins est déjà facturé.</p><div id="prodrows"></div><button type="button" class="btn ghost sm" data-v="add-prod" style="justify-self:start">+ Ajouter un produit</button></fieldset>
+    <fieldset><legend>Photo du bassin <small class="hint" id="photo-opt">${state.type === 'ponctuel' ? '(facultative)' : '(obligatoire)'}</small></legend>
+      ${assets ? `<input type="file" accept="image/*" capture="environment" id="vphoto" hidden><div class="photo-prev" id="photoprev"></div><button type="button" class="btn" data-v="photo" style="justify-self:start">${ICON.cam} Prendre la photo</button>` : `<p class="hint">L’envoi de photos n’est pas disponible dans cette vue.</p>`}
+    </fieldset>
+    <label class="f"><span>Remarques</span><textarea name="remarks" rows="3" placeholder="État du bassin, du local technique, observations…"></textarea></label>
+    <label class="f"><span>Besoins pour le prochain passage</span><textarea name="nextNote" rows="2" placeholder="Ex. : apporter une poche filtrante, contrôler la cellule"></textarea><small>S’affiche sur le prochain passage de ${esc(p.name)} et dans les rappels du jour.</small></label>
+    <fieldset><legend>Besoins produits</legend><div id="needrows"></div><button type="button" class="btn ghost sm" data-v="add-need" style="justify-self:start">+ Ajouter un besoin produit</button></fieldset>
+    <fieldset><legend>Facturation</legend>
+      <div class="grid2"><label class="f" data-req="price"><span>Prix du passage <small>(${priceLabel()})</small></span><input name="price" inputmode="decimal" value="${esc(p.price ?? '')}"></label>
+      <label class="f"><span>Date du passage</span><input type="date" name="date" value="${vDate}"></label></div>
+    </fieldset>
+    <div id="verr" class="errors" hidden></div>
+  </form>`;
+  const el = openSheet({ title: p.name, html, foot: `<button class="btn primary" data-v="save">Valider le passage</button>` });
+  const f = $('#vform', el);
+  const readVals = () => { const g = n => f.elements[n] ? L.num(f.elements[n].value) : null; return { cl: g('cl'), ph: g('ph'), tac: g('tac'), cya: g('cya'), prod: g('prod'), sel: g('sel'), redox: g('redox'), galets: g('galets') }; };
+  const paint = vals => {
+    ['cl', 'ph', 'tac', 'cya', 'sel', 'redox'].forEach(k => {
+      const lab = f.querySelector(`.mfield[data-param="${k}"]`); if (!lab) return;
+      lab.classList.remove('s-ok', 's-warn', 's-bad'); const sv = L.status(vals[k], st.th[k]); if (sv) lab.classList.add('s-' + sv);
+      const sw = lab.querySelector('.sw'); const col = k === 'ph' ? swatch(PH_SCALE, vals.ph) : k === 'cl' ? swatch(DPD_SCALE, vals.cl) : null;
+      sw.hidden = !col; if (col) sw.style.background = col;
+    });
+  };
+  const renderAnalysis = () => {
+    const vals = readVals(); paint(vals);
+    const a = analyze(vals, p, hist, st); state.sugg = a.sugg;
+    const box = $('#analysis', el);
+    let h = a.alerts.map(x => `<div class="alert ${x.level}">${x.text}</div>`).join('');
+    if (a.sugg.length) h += `<h3 style="margin-top:4px">Corrections suggérées</h3>` + a.sugg.map((sg, i) => sg.missing
+      ? `<div class="sugg"><div class="sq"><span>Ajoute un produit « ${PKIND[sg.kind]} » dans Réglages pour obtenir la dose.</span></div></div>`
+      : `<div class="sugg"><div class="sq"><span>${esc(sg.prod.name)}</span><b>${sg.q != null ? L.fmtQty(sg.q, sg.prod.doseUnit || 'g') : 'Volume manquant'}</b><small class="hint">${esc(sg.how)}${sg.pk && sg.pk.packs ? ` · soit ${esc(packPlural(sg.pk.packs, sg.prod))}` : ''}</small></div><div class="row-actions"><button type="button" class="btn sm" data-v="sugg-use" data-i="${i}">Utilisé</button><button type="button" class="btn sm ghost" data-v="sugg-need" data-i="${i}">À acheter</button></div></div>`).join('');
+    box.innerHTML = h;
+  };
+  const renderRows = () => { $('#prodrows', el).innerHTML = rowsHtml(state.products, 'prod'); $('#needrows', el).innerHTML = rowsHtml(state.needs, 'need'); };
+  const setType = t => {
+    state.type = t; $('#ponct-box', el).hidden = t !== 'ponctuel'; $('#const-opt', el).hidden = t !== 'ponctuel';
+    $('#photo-opt', el).textContent = t === 'ponctuel' ? '(facultative)' : '(obligatoire)';
+  };
+  renderRows(); renderAnalysis();
+  el.addEventListener('input', e => {
+    const row = e.target.closest('.prow');
+    if (row) {
+      const list = row.dataset.kind === 'prod' ? state.products : state.needs, r = list[+row.dataset.i], k = e.target.dataset.f;
+      if (!k) return;
+      r[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+      if (k === 'productId') renderRows();
+      return;
+    }
+    if (e.target.name === 'type') { setType(e.target.value); return; }
+    if (e.target.closest('.mfield')) { e.target.closest('.mfield').classList.remove('missing'); renderAnalysis(); }
+    const fr = e.target.closest('.f'); if (fr) fr.classList.remove('missing');
+  });
+  if (assets) $('#vphoto', el).addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0]; if (!file) return;
+    const prev = $('#photoprev', el); state.uploading = true; prev.innerHTML = '<p class="hint">Préparation et envoi de la photo…</p>';
+    try {
+      const { blob, at } = await stampPhoto(file, p.name);
+      const r = await assets.upload(blob, { type: 'image/jpeg' });
+      state.photo = { id: r.id, at };
+      prev.innerHTML = `<img src="${esc(r.url)}" alt="Photo du passage"><small class="hint">Horodatée le ${new Date(at).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}</small>`;
+    } catch (err) {
+      prev.innerHTML = `<p class="errors">Photo non envoyée (${esc(err && (err.code || err.message) || 'erreur')}). Réessaie.</p>`;
+    } finally { state.uploading = false; e.target.value = ''; }
+  });
+  el.addEventListener('click', async e => {
+    const b = e.target.closest('[data-v]'); if (!b) return;
+    const a = b.dataset.v;
+    if (a === 'photo') $('#vphoto', el).click();
+    else if (a === 'add-prod') { state.products.push({ productId: '', used: '', packs: 0 }); renderRows(); }
+    else if (a === 'add-need') { state.needs.push({ productId: '', packs: 1, note: '' }); renderRows(); }
+    else if (a === 'row-del') { const row = b.closest('.prow'); (row.dataset.kind === 'prod' ? state.products : state.needs).splice(+row.dataset.i, 1); renderRows(); }
+    else if (a === 'sugg-use' || a === 'sugg-need') {
+      const sg = state.sugg[+b.dataset.i]; if (!sg || !sg.prod) return;
+      if (a === 'sugg-use') { state.products.push({ productId: sg.prod.id, used: sg.pk ? sg.pk.qty : '', packs: 0 }); toast('Ajouté aux produits utilisés'); }
+      else { state.needs.push({ productId: sg.prod.id, packs: (sg.pk && sg.pk.packs) || 1, note: sg.q != null ? `Dose calculée : ${L.fmtQty(sg.q, sg.prod.doseUnit || 'g')}` : '' }); toast('Ajouté aux besoins produits'); }
+      renderRows();
+    }
+    else if (a === 'save') saveVisit();
+  });
+  async function saveVisit() {
+    if (state.uploading) { toast('Attends la fin de l’envoi de la photo.', true); return; }
+    const vals = readVals(), errs = [], ent = state.type === 'entretien';
+    $$('.missing', f).forEach(x => x.classList.remove('missing'));
+    const req = (k, label) => { if (vals[k] == null) { errs.push(label); const m = f.querySelector(`.mfield[data-param="${k}"]`); if (m) m.classList.add('missing'); } };
+    if (ent) {
+      req('cl', 'chlore libre'); req('ph', 'pH'); req('tac', 'TAC'); req('cya', 'stabilisant');
+      if (tr === 'electrolyseur') req('prod', 'production de l’électrolyseur');
+      if (tr === 'liquide') req('redox', 'redox');
+      if (tr === 'galets') req('galets', 'nombre de galets');
+      if (assets && !state.photo) errs.push('photo du bassin');
+    }
+    const price = L.num(f.elements.price.value);
+    if (price == null) { errs.push('prix du passage'); f.querySelector('[data-req="price"]').classList.add('missing'); }
+    const ranges = { ph: [5, 9.5], cl: [0, 30], tac: [0, 600], cya: [0, 400], redox: [0, 1200], sel: [0, 15], galets: [0, 50] };
+    Object.entries(ranges).forEach(([k, [lo, hi]]) => { if (vals[k] != null && (vals[k] < lo || vals[k] > hi)) errs.push(`${(PARAMS[k] || { label: 'galets' }).label} hors plage (${nf(vals[k], 2)})`); });
+    if (tr === 'electrolyseur' && (p.elecUnit || '%') === '%' && vals.prod != null && (vals.prod < 0 || vals.prod > 100)) errs.push('production hors plage (0 à 100 %)');
+    const prodLines = state.products.filter(r => r.productId && (L.num(r.used) != null || +r.packs > 0));
+    prodLines.forEach(r => { const pr = S.products[r.productId]; if (+r.packs > 0 && (pr.price == null || pr.price === '')) errs.push(`prix du conditionnement de ${pr.name} (à renseigner dans Réglages)`); });
+    const box = $('#verr', el);
+    if (errs.length) { box.hidden = false; box.textContent = 'À compléter : ' + errs.join(', ') + '.'; box.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    box.hidden = true;
+    const date = f.elements.date.value || vDate, month = L.ym(date), vid = uid(), now = new Date();
+    const at = `${date}T${L.pad(now.getHours())}:${L.pad(now.getMinutes())}:00`;
+    const label = ent ? 'Entretien' : (f.elements.label.value + (f.elements.labelMore.value.trim() ? ' – ' + f.elements.labelMore.value.trim() : ''));
+    const visit = {
+      poolId: p.id, stopId: s.id, date, at, type: state.type, label,
+      cl: vals.cl, ph: vals.ph, tac: vals.tac, cya: vals.cya, sel: vals.sel, redox: vals.redox,
+      treat: { kind: tr, value: tr === 'electrolyseur' ? vals.prod : tr === 'liquide' ? vals.redox : vals.galets, unit: tr === 'electrolyseur' ? (p.elecUnit || '%') : tr === 'liquide' ? 'mV' : 'galets' },
+      photoId: state.photo ? state.photo.id : null, photoAt: state.photo ? state.photo.at : null,
+      remarks: f.elements.remarks.value.trim(), nextNote: f.elements.nextNote.value.trim(), price,
+      products: prodLines.map(r => { const pr = S.products[r.productId]; return { productId: r.productId, name: pr.name, used: L.num(r.used), usedUnit: pr.packUnit || '', packs: Math.round(+r.packs || 0), pack: packName(pr), price: +pr.price || 0 }; }),
+      createdAt: Date.now()
+    };
+    const ops = [put('visits', vid, visit)];
+    const line = (o, i) => ops.push(put('lines', vid + '-' + i, { poolId: p.id, month, date, source: 'visite', refId: vid, ...o }));
+    let li = 0;
+    line({ kind: ent ? 'passage' : 'ponctuel', label, qty: 1, unit: '', unitPrice: price }, li++);
+    visit.products.filter(x => x.packs > 0).forEach(x => line({ kind: 'produit', label: x.name, qty: x.packs, unit: x.pack, unitPrice: x.price }, li++));
+    state.needs.filter(r => r.productId).forEach(r => { const pr = S.products[r.productId]; ops.push(put('needs', uid(), { poolId: p.id, productId: r.productId, name: pr.name, qty: Math.max(1, Math.round(+r.packs || 1)), unit: packName(pr), note: (r.note || '').trim(), status: 'open', createdAt: Date.now() })); });
+    ops.push(upd('stops', s.id, { status: 'fait', visitId: vid, date, type: state.type, label: ent ? null : label }));
+    const old = p.pendingNote && p.pendingNote.text ? p.pendingNote : null;
+    const keepOld = old && !(f.elements.noteDone && f.elements.noteDone.checked);
+    const newNote = visit.nextNote ? { text: visit.nextNote, date, from: vid } : (keepOld ? old : null);
+    if (JSON.stringify(newNote) !== JSON.stringify(old)) ops.push(upd('pools', p.id, { pendingNote: newNote }));
+    const btn = el.querySelector('[data-v="save"]'); btn.disabled = true; btn.textContent = 'Enregistrement…';
+    const ok = await run(ops, 'Passage validé');
+    if (ok) closeSheet(); else { btn.disabled = false; btn.textContent = 'Valider le passage'; }
+  }
+}
+
+function openVisit(id) {
+  const v = S.visits[id]; if (!v) { toast('Passage introuvable (plus d’un an ?).', true); return; }
+  const p = S.pools[v.poolId];
+  const tr = v.treat || {};
+  const el = openSheet({
+    title: `${p ? p.name : 'Passage'} · ${dateFr(v.date)}`,
+    html: `<div class="form vdetail">
+      <p class="muted">${esc(v.label || 'Entretien')} · validé ${v.at ? 'à ' + v.at.slice(11, 16).replace(':', 'h') : ''}</p>
+      ${valueChips(v)}
+      ${tr.value != null ? `<p><b>${esc(TRAITEMENT[tr.kind] || '')}</b> : ${nf(tr.value, 1)} ${esc(tr.unit || '')}${v.sel != null ? ` · sel ${nf(v.sel, 1)} g/L` : ''}</p>` : ''}
+      ${v.photoId ? `<img data-blob="${esc(v.photoId)}" src="${blobSrc(v.photoId)}" alt="Photo du passage">` : ''}
+      ${v.products && v.products.length ? `<div><b>Produits utilisés</b><ul>${v.products.map(x => `<li>${esc(x.name)}${x.used != null ? ` : ${nf(x.used, 2)} ${esc(x.usedUnit || '')}` : (x.qty != null ? ` : ${nf(x.qty, 2)} ${esc(x.unit || '')}` : '')}${x.packs > 0 ? ` · facturé ${nf(x.packs, 0)} × ${esc(x.pack)} = ${eur(x.packs * x.price)}` : ''}</li>`).join('')}</ul></div>` : ''}
+      ${v.remarks ? `<div><b>Remarques</b><p>${esc(v.remarks)}</p></div>` : ''}
+      ${v.nextNote ? `<div><b>Pour le passage suivant</b><p>${esc(v.nextNote)}</p></div>` : ''}
+      <p>Prix du passage : ${eur(v.price)}</p>
+      <button class="btn ghost danger" data-v="delete" style="justify-self:start">Supprimer ce passage</button>
+      <p class="hint">La suppression retire aussi ses lignes de facturation et remet le passage « à faire » dans le planning.</p>
+    </div>`
+  });
+  el.addEventListener('click', async e => {
+    const b = e.target.closest('[data-v="delete"]'); if (!b) return;
+    if (!armed(b, 'Confirmer la suppression')) return;
+    const ops = [del('visits', id)];
+    Object.values(S.lines).filter(l => l.refId === id).forEach(l => ops.push(del('lines', l.id)));
+    if (v.stopId && S.stops[v.stopId]) ops.push(upd('stops', v.stopId, { status: 'prevu', visitId: null }));
+    closeSheet();
+    const ok = await run(ops, 'Passage supprimé');
+    if (ok && v.photoId && assets) assets.delete(v.photoId).catch(() => { });
+  });
+}
+
+/* ========== PISCINES ========== */
+function poolCard(p) {
+  const st = settings(), hist = poolVisits(p.id), last = hist[hist.length - 1];
+  const eqWarn = (p.equipment || []).some(e => { const d = L.equipDue(e, st.equipLife[EQUIP[e.type] && EQUIP[e.type].life], L.ym(today())); return d && d.level !== 'ok'; });
+  const f = L.freqFor(p, today());
+  return `<button class="pcard" data-action="pool" data-id="${p.id}">
+    ${p.photoId ? `<img data-blob="${esc(p.photoId)}" src="${blobSrc(p.photoId)}" alt="" loading="lazy">` : `<span class="pthumb">${ICON.drop}</span>`}
+    <span class="pbody"><strong>${esc(p.name)}</strong>
+      <span class="muted">${esc([town(p.address), p.volume ? nf(p.volume, 0) + ' m³' : '', TRT_SHORT[p.treatment], freqLabel(f)].filter(Boolean).join(' · '))}</span>
+      <span class="muted sm">${last ? `Dernier passage : ${shortDate(last.date)}` : 'Aucun passage enregistré'}</span>
+      ${last ? valueChips(last) : ''}
+      <span class="badges">${p.pendingNote && p.pendingNote.text ? '<span class="badge warn">Rappel en cours</span>' : ''}${eqWarn ? '<span class="badge warn">Matériel à prévoir</span>' : ''}${!p.gps ? '<span class="badge">Sans GPS</span>' : ''}</span>
+    </span></button>`;
+}
+function poolListHtml() {
+  const q = UI.search.trim().toLowerCase();
+  const list = pools().filter(p => !q || [p.name, p.address, p.notes].join(' ').toLowerCase().includes(q));
+  if (!list.length) return q ? `<p class="muted">Aucune piscine ne correspond à « ${esc(UI.search)} ».</p>` : '';
+  return `<div class="plist">${list.map(poolCard).join('')}</div>`;
+}
+function viewPools() {
+  if (UI.poolId) return viewPool(UI.poolId);
+  const n = pools().length;
+  if (!n) return `<div class="empty-state"><h2>Aucune fiche piscine</h2><p>Une fiche regroupe le client, l’adresse et ses coordonnées GPS, le volume, la filtration, la couverture, le traitement, la fréquence de passage, le prix et le matériel. C’est elle qui alimente le planning, la calculatrice et la facturation.</p><button class="btn primary" data-action="new-pool">Créer la première fiche</button></div>`;
+  return `<div class="toolbar"><input type="search" id="pool-search" placeholder="Rechercher un client, une ville…" value="${esc(UI.search)}" aria-label="Rechercher"><button class="btn primary" data-action="new-pool">+ Nouvelle piscine</button></div>
+    <p class="muted sm">${n} piscine${n > 1 ? 's' : ''} suivie${n > 1 ? 's' : ''}</p>
+    <div id="pool-list">${poolListHtml()}</div>`;
+}
+$('#view').addEventListener('input', e => { if (e.target.id === 'pool-search') { UI.search = e.target.value; $('#pool-list').innerHTML = poolListHtml(); } });
+
+function spark(vals, t, label) {
+  const v = vals.filter(x => x != null).slice(-12);
+  if (v.length < 2) return '<p class="hint">Pas encore assez de mesures</p>';
+  const W = 180, H = 46, P = 5;
+  let lo = Math.min(...v, t.min), hi = Math.max(...v, t.max); if (hi - lo < 1e-6) { hi += 1; lo -= 1; }
+  const y = x => H - P - (x - lo) / (hi - lo) * (H - 2 * P), xs = i => P + i * (W - 2 * P) / (v.length - 1);
+  const pts = v.map((x, i) => `${xs(i).toFixed(1)},${y(x).toFixed(1)}`).join(' ');
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)} sur les ${v.length} derniers passages"><rect class="sp-band" x="0" y="${y(t.max).toFixed(1)}" width="${W}" height="${Math.max(0, y(t.min) - y(t.max)).toFixed(1)}"/><polyline class="sp-line" points="${pts}"/><circle class="sp-dot" cx="${xs(v.length - 1).toFixed(1)}" cy="${y(v[v.length - 1]).toFixed(1)}" r="3.2"/></svg>`;
+}
+function viewPool(id) {
+  const p = S.pools[id];
+  if (!p) { UI.poolId = null; return viewPools(); }
+  const st = settings(), hist = poolVisits(id), last = hist[hist.length - 1], nxt = nextStopOf(id), nowYm = L.ym(today());
+  const navUrl = plansUrl(null, p.gps, p.address);
+  const fact = (k, v) => `<div><dt>${k}</dt><dd>${v || '<span class="muted">–</span>'}</dd></div>`;
+  const curM = +today().slice(5, 7);
+  const fm = MONTHS_S.map((m, i) => L.freqFor(p, `2000-${L.pad(i + 1)}-15`));
+  const monthGrid = `<div class="monthfreq">${MONTHS_S.map((m, i) => `<div class="${i + 1 === curM ? 'cur' : ''}"><span>${m}</span><b>${freqShort(fm[i])}</b></div>`).join('')}</div>`;
+  const freqNotes = [fm.includes(0.25) ? `1 par mois : ${+p.monthWeek > 1 ? (+p.monthWeek) + 'e' : '1re'} semaine du mois` : '', fm.includes(0.5) ? `1 toutes les 2 semaines : semaines ${+p.parity ? 'impaires' : 'paires'}` : ''].filter(Boolean).join(' · ');
+  const dims = p.dims && (p.dims.L || p.dims.l) ? `${nf(p.dims.L, 2)} × ${nf(p.dims.l, 2)} m, prof. moy. ${nf(p.dims.p, 2)} m` : '';
+  const acc = p.access || {};
+  const eq = (p.equipment || []).map(e => {
+    const d = L.equipDue(e, st.equipLife[EQUIP[e.type] && EQUIP[e.type].life], nowYm);
+    const badge = d ? `<span class="badge ${d.level === 'ok' ? 'ok' : d.level}">${d.level === 'bad' ? 'À remplacer' : d.level === 'warn' ? 'Bientôt' : 'OK'} · ${monthLabel(d.due)}</span>` : '';
+    return `<div class="eq"><div><b>${esc(EQUIP[e.type] ? EQUIP[e.type].label : e.type)}</b>${e.model ? ` · ${esc(e.model)}` : ''}<br><span class="muted sm">${e.installed ? 'Posé en ' + monthLabel(String(e.installed).slice(0, 7)) : 'Date de pose inconnue'}</span></div>${badge}</div>`;
+  }).join('');
+  const mm = k => `<div class="measure"><span>${PARAMS[k].label}${PARAMS[k].unit ? ' (' + PARAMS[k].unit + ')' : ''}</span>${last && last[k] != null ? `<b class="num">${nf(last[k], PARAMS[k].d)}</b>` : '<b class="muted">–</b>'}${spark(hist.map(v => v[k]), st.th[k], PARAMS[k].label)}</div>`;
+  const histRows = [...hist].reverse().slice(0, 40).map(v => `<button class="hrow" data-action="visit" data-id="${v.id}">${v.photoId ? `<img data-blob="${esc(v.photoId)}" src="${blobSrc(v.photoId)}" alt="" loading="lazy">` : ''}<span class="hb"><span><b>${dateFr(v.date)}</b> · ${esc(v.label || 'Entretien')}</span>${valueChips(v)}${v.remarks ? `<span class="muted sm">${esc(v.remarks.slice(0, 110))}</span>` : ''}</span></button>`).join('');
+  return `<div class="fiche">
+    <button class="btn ghost sm back" data-action="back-pools">${ICON.left} Toutes les piscines</button>
+    <div class="fiche-head">
+      ${p.photoId ? `<img class="fiche-photo" data-blob="${esc(p.photoId)}" src="${blobSrc(p.photoId)}" alt="Piscine de ${esc(p.name)}">` : ''}
+      <div class="fiche-title"><h1>${esc(p.name)}</h1><p>${esc(p.address || 'Adresse non renseignée')}</p>
+        <div class="row-actions"><button class="btn primary" data-action="pool-visit" data-id="${id}">Saisir un passage</button><button class="btn" data-action="calc" data-id="${id}">Calculatrice produits</button><button class="btn ghost" data-action="edit-pool" data-id="${id}">Modifier</button>${navUrl ? `<a class="btn ghost" href="${esc(navUrl)}" target="_blank" rel="noopener">Itinéraire (Plans)</a>` : ''}</div>
+      </div>
+    </div>
+    ${p.pendingNote && p.pendingNote.text ? `<div class="callout"><b>À prévoir au prochain passage${nxt ? ` (${dayLabel(nxt.date, true)})` : ''}</b><p>${esc(p.pendingNote.text)}</p></div>` : ''}
+    <div class="fiche-grid">
+      <section class="card"><h2>Bassin</h2><dl class="facts">
+        ${fact('Volume', p.volume ? nf(p.volume, 1) + ' m³' : '')}${fact('Dimensions', esc(dims))}${fact('Filtration', esc(FILTRATION[p.filtration]))}${fact('Couverture', esc(COUVERTURE[p.coverage]))}${fact('Traitement', esc(TRAITEMENT[p.treatment]) + (p.treatment === 'electrolyseur' ? ` (en ${esc(p.elecUnit || '%')})` : ''))}${fact('GPS', p.gps ? esc(gpsText(p.gps)) : '<span style="color:var(--warn)">non renseigné</span>')}
+      </dl></section>
+      <section class="card"><h2>Planning et tarif</h2>
+        ${monthGrid}${freqNotes ? `<p class="hint">${freqNotes}</p>` : ''}
+        <dl class="facts">
+        ${fact('Jours préférés', (p.prefDays || []).length ? p.prefDays.map(d => DOW[d]).join(', ') : 'Tous les jours de tournée')}${fact('Durée d’entretien', p.duration ? dur(p.duration) : '')}${fact('Prix du passage', p.price != null && p.price !== '' ? eur(p.price) : '')}${fact('Prochain passage', nxt ? dayLabel(nxt.date, true) : '')}
+      </dl></section>
+      <section class="card"><h2>Accès</h2><dl class="facts">
+        ${fact('Code portail', esc(acc.gate))}${fact('Local technique', esc(acc.local))}${fact('Clés', esc(acc.keys))}${fact('Animaux', esc(acc.animals))}${fact('Contact sur place', esc(acc.contact))}
+      </dl>
+      ${p.phone || p.email ? `<div class="contact">${p.phone ? `<span>${esc(p.phone)}</span><button class="btn sm ghost" data-action="copy" data-text="${esc(p.phone)}">Copier le numéro</button>` : ''}${p.email ? `<span>${esc(p.email)}</span><button class="btn sm ghost" data-action="copy" data-text="${esc(p.email)}">Copier l’e-mail</button>` : ''}</div>` : ''}
+      </section>
+      <section class="card"><h2>Matériel</h2>${eq ? `<div class="eqlist">${eq}</div>` : '<p class="muted">Aucun matériel renseigné. Ajoute la pompe, le filtre et la cellule dans « Modifier » pour être prévenu des remplacements.</p>'}</section>
+    </div>
+    <section class="card"><h2>Dernières mesures</h2>${hist.length ? `<div class="measures">${mm('ph')}${mm('cl')}${mm('tac')}${mm('cya')}</div><p class="hint">La bande verte correspond à la plage idéale réglée dans Réglages.</p>` : '<p class="muted">Aucune mesure pour l’instant.</p>'}</section>
+    ${p.notes ? `<section class="card"><h2>Notes</h2><p style="white-space:pre-line">${esc(p.notes)}</p></section>` : ''}
+    <section class="card"><h2>Historique des passages</h2>${histRows ? `<div class="hlist">${histRows}</div>` : '<p class="muted">Aucun passage sur les 12 derniers mois.</p>'}</section>
+    <button class="btn ghost danger" data-action="archive-pool" data-id="${id}" style="justify-self:start">Archiver la fiche</button>
+  </div>`;
+}
+
+function openPoolForm(id) {
+  const st = settings();
+  const p = id ? clone(S.pools[id]) : { active: true, freqByMonth: FREQ_DEFAULT.slice(), monthWeek: 1, parity: L.isoWeek(today()) % 2, prefDays: [], duration: 45, price: '', filtration: 'sable', coverage: 'volet', treatment: 'electrolyseur', elecUnit: '%', access: {}, equipment: [], dims: {} };
+  const fbm = MONTHS.map((_, i) => L.freqFor(p, `2000-${L.pad(i + 1)}-15`));
+  const futureStops = id ? Object.values(S.stops).filter(s => s.poolId === id && s.status !== 'fait' && s.type !== 'ponctuel' && !s.priority && s.date >= today()) : [];
+  const state = { equipment: (p.equipment || []).map(e => ({ ...e })), photoId: p.photoId || null, uploading: false };
+  const opts = (obj, sel) => Object.entries(obj).map(([k, v]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${esc(v)}</option>`).join('');
+  const fopts = (sel, short) => FREQ.map(([v, l, s]) => `<option value="${v}" ${sel !== '' && +sel === v ? 'selected' : ''}>${short ? s : l}</option>`).join('');
+  const acc = p.access || {};
+  const wk = L.isoWeek(today());
+  const eqHtml = () => state.equipment.length ? state.equipment.map((e, i) => `<div class="prow" data-i="${i}">
+      <select data-f="type" aria-label="Type de matériel">${opts(Object.fromEntries(Object.entries(EQUIP).map(([k, v]) => [k, v.label])), e.type)}</select>
+      <input data-f="model" value="${esc(e.model || '')}" placeholder="Modèle" aria-label="Modèle" style="flex:1;min-width:120px">
+      <input data-f="installed" type="month" value="${esc(e.installed || '')}" aria-label="Date de pose" style="width:150px;flex:none">
+      <input data-f="life" inputmode="numeric" value="${esc(e.life ?? '')}" placeholder="Durée (mois)" aria-label="Durée de vie en mois" style="width:110px;flex:none">
+      <button type="button" class="icon-btn" data-v="eq-del" aria-label="Retirer">${ICON.x}</button></div>`).join('') : '<p class="hint">Aucun matériel.</p>';
+  const el = openSheet({
+    title: id ? `Modifier · ${p.name}` : 'Nouvelle piscine',
+    html: `<form class="form" id="pform" novalidate>
+      <fieldset><legend>Client</legend>
+        <label class="f" data-req="name"><span>Nom du client</span><input name="name" value="${esc(p.name || '')}" autocomplete="off"></label>
+        <div class="grid2"><label class="f"><span>Téléphone</span><input name="phone" type="tel" value="${esc(p.phone || '')}"></label><label class="f"><span>E-mail</span><input name="email" type="email" value="${esc(p.email || '')}"></label></div>
+      </fieldset>
+      <fieldset><legend>Adresse</legend>
+        <label class="f"><span>Adresse</span><input name="address" value="${esc(p.address || '')}" placeholder="Rue, code postal, ville"></label>
+        <label class="f" data-req="gps"><span>Coordonnées GPS</span><input name="gps" value="${esc(gpsText(p.gps))}" placeholder="43.27268, 6.58012" inputmode="decimal"><small id="gps-hint">Dans Google Maps : appui long sur la piscine, puis touche les coordonnées pour les copier. Sert au calcul des trajets.</small></label>
+      </fieldset>
+      <fieldset><legend>Bassin</legend>
+        <div class="grid3"><label class="f"><span>Longueur (m)</span><input name="dL" inputmode="decimal" value="${esc(p.dims && p.dims.L || '')}"></label><label class="f"><span>Largeur (m)</span><input name="dl" inputmode="decimal" value="${esc(p.dims && p.dims.l || '')}"></label><label class="f"><span>Prof. moyenne (m)</span><input name="dp" inputmode="decimal" value="${esc(p.dims && p.dims.p || '')}"></label></div>
+        <div class="grid2"><label class="f" data-req="volume"><span>Volume (m³)</span><input name="volume" inputmode="decimal" value="${esc(p.volume ?? '')}"></label><button type="button" class="btn ghost" data-v="calc-vol" style="align-self:end;white-space:normal;line-height:1.15;padding-block:6px">Calculer depuis les dimensions</button></div>
+        <div class="grid2"><label class="f"><span>Filtration</span><select name="filtration">${opts(FILTRATION, p.filtration)}</select></label><label class="f"><span>Couverture</span><select name="coverage">${opts(COUVERTURE, p.coverage)}</select></label></div>
+        <div class="grid2"><label class="f"><span>Traitement</span><select name="treatment">${opts(TRAITEMENT, p.treatment)}</select></label><label class="f" id="elec-unit" ${p.treatment === 'electrolyseur' ? '' : 'hidden'}><span>Valeur de l’électrolyseur en</span><select name="elecUnit"><option value="%" ${p.elecUnit !== 'A' ? 'selected' : ''}>%</option><option value="A" ${p.elecUnit === 'A' ? 'selected' : ''}>Ampères</option></select></label></div>
+      </fieldset>
+      <fieldset><legend>Planning et tarif</legend>
+        <div class="f"><span>Passages par semaine, mois par mois</span>
+          <label class="f"><small>Tout régler d’un coup</small><select id="freq-all"><option value="">Choisir une fréquence pour les 12 mois…</option>${fopts('')}</select></label>
+          <div class="mgrid12">${MONTHS_S.map((m, i) => `<label class="f"><span>${m}</span><select name="fm${i}" aria-label="${MONTHS[i]}">${fopts(fbm[i], true)}</select></label>`).join('')}</div>
+        </div>
+        <label class="f" id="mweek" ${fbm.includes(0.25) ? '' : 'hidden'}><span>1 par mois : quelle semaine du mois ?</span><select name="monthWeek">${[1, 2, 3, 4].map(n => `<option value="${n}" ${(+p.monthWeek || 1) === n ? 'selected' : ''}>${n === 1 ? '1re' : n + 'e'} semaine</option>`).join('')}</select></label>
+        <label class="f" id="parity" ${fbm.includes(0.5) ? '' : 'hidden'}><span>Toutes les 2 semaines : quelles semaines ?</span><select name="parity"><option value="0" ${!+p.parity ? 'selected' : ''}>Semaines paires</option><option value="1" ${+p.parity ? 'selected' : ''}>Semaines impaires</option></select><small>Cette semaine est la semaine ${wk} (${wk % 2 ? 'impaire' : 'paire'}).</small></label>
+        ${futureStops.length ? `<label class="check callout" id="freq-reset" hidden><input type="checkbox" name="freqReset" checked> Retirer les ${futureStops.length} passage${futureStops.length > 1 ? 's' : ''} d’entretien déjà planifié${futureStops.length > 1 ? 's' : ''} à partir d’aujourd’hui. Ils ont été calculés avec l’ancienne fréquence : relance « Remplir la semaine » ensuite.</label>` : ''}
+        <div class="f"><span>Jours préférés <small>(aucun = tous les jours de tournée)</small></span><div class="daypick">${[1, 2, 3, 4, 5, 6, 7].map(d => `<label><input type="checkbox" name="prefDays" value="${d}" ${(p.prefDays || []).map(Number).includes(d) ? 'checked' : ''}><span>${DOW[d]}</span></label>`).join('')}</div></div>
+        <div class="grid2"><label class="f"><span>Durée d’entretien (min)</span><input name="duration" inputmode="numeric" value="${esc(p.duration ?? '')}"></label><label class="f"><span>Prix du passage (${priceLabel()})</span><input name="price" inputmode="decimal" value="${esc(p.price ?? '')}"></label></div>
+      </fieldset>
+      <fieldset><legend>Accès</legend>
+        <div class="grid2"><label class="f"><span>Code portail</span><input name="gate" value="${esc(acc.gate || '')}" autocomplete="off"></label><label class="f"><span>Local technique</span><input name="local" value="${esc(acc.local || '')}" placeholder="Emplacement"></label></div>
+        <div class="grid2"><label class="f"><span>Clés</span><input name="keys" value="${esc(acc.keys || '')}"></label><label class="f"><span>Animaux</span><input name="animals" value="${esc(acc.animals || '')}"></label></div>
+        <label class="f"><span>Contact sur place</span><input name="contact" value="${esc(acc.contact || '')}" placeholder="Gardien, voisin, conciergerie…"></label>
+      </fieldset>
+      <fieldset><legend>Matériel</legend><p class="hint">Date de pose et durée de vie servent aux rappels de remplacement. Laisse la durée vide pour reprendre la valeur par défaut des Réglages.</p><div id="eqrows">${eqHtml()}</div><button type="button" class="btn ghost sm" data-v="eq-add" style="justify-self:start">+ Ajouter du matériel</button></fieldset>
+      <fieldset><legend>Photo de la piscine</legend>${assets ? `<input type="file" accept="image/*" id="pphoto" hidden><div class="photo-prev" id="pphotoprev">${state.photoId ? `<img data-blob="${esc(state.photoId)}" src="${blobSrc(state.photoId)}" alt="">` : ''}</div><button type="button" class="btn ghost" data-v="photo" style="justify-self:start">${ICON.cam} ${state.photoId ? 'Changer la photo' : 'Ajouter une photo'}</button>` : '<p class="hint">Envoi de photos indisponible dans cette vue.</p>'}</fieldset>
+      <label class="f"><span>Notes</span><textarea name="notes" rows="3">${esc(p.notes || '')}</textarea></label>
+      <div id="perr" class="errors" hidden></div>
+    </form>`,
+    foot: `<button class="btn primary" data-v="save">${id ? 'Enregistrer' : 'Créer la fiche'}</button>`
+  });
+  const f = $('#pform', el);
+  const gpsHint = () => { const g = L.parseGps(f.elements.gps.value), hEl = $('#gps-hint', el); if (!f.elements.gps.value.trim()) return; hEl.textContent = g ? `Lu : ${g.lat}, ${g.lng}` : 'Format non reconnu. Exemple : 43.27268, 6.58012'; hEl.style.color = g ? 'var(--ok)' : 'var(--bad)'; };
+  gpsHint();
+  el.addEventListener('input', e => {
+    const t = e.target, row = t.closest('.prow');
+    if (row && $('#eqrows', el).contains(row)) {
+      const r = state.equipment[+row.dataset.i]; r[t.dataset.f] = t.value;
+      if (t.dataset.f === 'type' && !r.life) { const k = EQUIP[t.value] && EQUIP[t.value].life; if (k) { r.life = ''; } }
+      return;
+    }
+    if (t.name === 'gps') gpsHint();
+    if (t.name === 'treatment') $('#elec-unit', el).hidden = t.value !== 'electrolyseur';
+    if (t.id === 'freq-all' && t.value !== '') { for (let i = 0; i < 12; i++) f.elements['fm' + i].value = t.value; t.value = ''; }
+    if (t.id === 'freq-all' || /^fm\d+$/.test(t.name || '')) {
+      const vals = Array.from({ length: 12 }, (_, i) => +f.elements['fm' + i].value);
+      $('#mweek', el).hidden = !vals.includes(0.25); $('#parity', el).hidden = !vals.includes(0.5);
+    }
+    if (t.id === 'freq-all' || /^fm\d+$/.test(t.name || '') || t.name === 'monthWeek' || t.name === 'parity') {
+      const rs = $('#freq-reset', el);
+      if (rs) rs.hidden = Array.from({ length: 12 }, (_, i) => +f.elements['fm' + i].value).every((x, i) => x === fbm[i]) && (+f.elements.monthWeek.value || 1) === (+p.monthWeek || 1) && +f.elements.parity.value === (+p.parity || 0);
+    }
+    const fr = t.closest('.f'); if (fr) fr.classList.remove('missing');
+  });
+  if (assets) $('#pphoto', el).addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0]; if (!file) return;
+    const prev = $('#pphotoprev', el); state.uploading = true; prev.innerHTML = '<p class="hint">Envoi de la photo…</p>';
+    try { const { blob } = await stampPhoto(file, f.elements.name.value || 'Piscine'); const r = await assets.upload(blob, { type: 'image/jpeg' }); state.photoId = r.id; prev.innerHTML = `<img src="${esc(r.url)}" alt="">`; }
+    catch (err) { prev.innerHTML = `<p class="errors">Photo non envoyée (${esc(err && (err.code || err.message) || 'erreur')}).</p>`; }
+    finally { state.uploading = false; e.target.value = ''; }
+  });
+  el.addEventListener('click', async e => {
+    const b = e.target.closest('[data-v]'); if (!b) return;
+    const a = b.dataset.v;
+    if (a === 'calc-vol') {
+      const Lg = L.num(f.elements.dL.value), lg = L.num(f.elements.dl.value), pr = L.num(f.elements.dp.value);
+      if (Lg && lg && pr) { f.elements.volume.value = String(L.round(Lg * lg * pr, 1)).replace('.', ','); toast(`Volume : ${nf(Lg * lg * pr, 1)} m³`); }
+      else toast('Renseigne longueur, largeur et profondeur moyenne.', true);
+    } else if (a === 'eq-add') { state.equipment.push({ type: 'sable', model: '', installed: '', life: '' }); $('#eqrows', el).innerHTML = eqHtml(); }
+    else if (a === 'eq-del') { state.equipment.splice(+b.closest('.prow').dataset.i, 1); $('#eqrows', el).innerHTML = eqHtml(); }
+    else if (a === 'photo') $('#pphoto', el).click();
+    else if (a === 'save') {
+      if (state.uploading) { toast('Attends la fin de l’envoi de la photo.', true); return; }
+      const errs = [], v = n => f.elements[n].value.trim();
+      const name = v('name'), volume = L.num(v('volume')), gpsRaw = v('gps'), gps = L.parseGps(gpsRaw);
+      if (!name) { errs.push('nom du client'); f.querySelector('[data-req="name"]').classList.add('missing'); }
+      if (!volume || volume <= 0) { errs.push('volume du bassin'); f.querySelector('[data-req="volume"]').classList.add('missing'); }
+      if (gpsRaw && !gps) { errs.push('coordonnées GPS (format non reconnu)'); f.querySelector('[data-req="gps"]').classList.add('missing'); }
+      const box = $('#perr', el);
+      if (errs.length) { box.hidden = false; box.textContent = 'À corriger : ' + errs.join(', ') + '.'; box.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+      const doc = {
+        ...(id ? clone(S.pools[id]) : { createdAt: Date.now() }), active: true,
+        name, phone: v('phone'), email: v('email'), address: v('address'), gps: gps || null,
+        dims: { L: L.num(v('dL')), l: L.num(v('dl')), p: L.num(v('dp')) }, volume,
+        filtration: v('filtration'), coverage: v('coverage'), treatment: v('treatment'), elecUnit: v('elecUnit'),
+        freqByMonth: Array.from({ length: 12 }, (_, i) => +f.elements['fm' + i].value), monthWeek: +v('monthWeek') || 1, parity: +v('parity'),
+        prefDays: $$('[name="prefDays"]:checked', f).map(i => +i.value),
+        duration: L.num(v('duration')) || 40, price: L.num(v('price')),
+        access: { gate: v('gate'), local: v('local'), keys: v('keys'), animals: v('animals'), contact: v('contact') },
+        equipment: state.equipment.map(e => ({ type: e.type, model: (e.model || '').trim(), installed: e.installed || '', life: L.num(e.life) })),
+        photoId: state.photoId, notes: v('notes')
+      };
+      delete doc.id; delete doc.freqSeason; delete doc.freqOff;
+      const pid = id || uid();
+      const rs = $('#freq-reset', el), reset = rs && !rs.hidden && f.elements.freqReset.checked;
+      const ops = [put('pools', pid, doc), ...(reset ? futureStops.map(s => del('stops', s.id)) : [])];
+      const ok = await run(ops, reset ? `Fiche enregistrée, ${futureStops.length} passage${futureStops.length > 1 ? 's' : ''} retiré${futureStops.length > 1 ? 's' : ''} du planning` : (id ? 'Fiche enregistrée' : 'Fiche créée'));
+      if (ok) { closeSheet(); UI.poolId = pid; setTab('piscines'); }
+    }
+  });
+}
+
+function openCalc(poolId) {
+  const p = S.pools[poolId]; if (!p) return;
+  const st = settings(), hist = poolVisits(poolId), last = hist[hist.length - 1] || {};
+  const list = products().filter(x => x.calc === 'step' || x.calc === 'fixe');
+  if (!list.length) { toast('Aucun produit calculable : ajoute-en dans Réglages.', true); return; }
+  const el = openSheet({
+    title: `Calculatrice · ${p.name}`,
+    html: `<form class="form" id="cform" novalidate>
+      <label class="f"><span>Produit</span><select name="prod">${list.map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select></label>
+      <div class="grid2"><label class="f"><span>Volume du bassin (m³)</span><input name="vol" inputmode="decimal" value="${esc(p.volume ?? '')}"></label><label class="f" id="c-dose"><span id="c-dose-l">Dose</span><input name="dose" inputmode="decimal"><small id="c-dose-h">Dose de l’étiquette. Modifie-la si tu changes de produit.</small></label></div>
+      <div class="grid2" id="c-step"><label class="f"><span id="c-cur-l">Valeur mesurée</span><input name="cur" inputmode="decimal"></label><label class="f"><span>Valeur cible</span><input name="tgt" inputmode="decimal"></label></div>
+      <div class="result" id="c-res" aria-live="polite"></div>
+      <div class="row-actions"><button type="button" class="btn" data-v="need">Ajouter aux besoins produits</button><button type="button" class="btn ghost" data-v="save-dose">Enregistrer cette dose pour le produit</button></div>
+      <fieldset><legend>Vidange partielle (stabilisant)</legend>
+        <div class="grid2"><label class="f"><span>Stabilisant mesuré (ppm)</span><input name="cyaCur" inputmode="decimal" value="${esc(last.cya ?? '')}"></label><label class="f"><span>Stabilisant visé (ppm)</span><input name="cyaTgt" inputmode="decimal" value="${st.th.cya.target}"></label></div>
+        <div class="result" id="c-drain"></div>
+        <p class="hint">Le stabilisant ne s’évapore pas et aucun produit ne le retire : seule l’eau neuve le dilue. Pourcentage à vider = 1 − visé ÷ mesuré.</p>
+      </fieldset>
+    </form>`
+  });
+  const f = $('#cform', el);
+  let cur = null;
+  const loadProd = () => {
+    cur = S.products[f.elements.prod.value];
+    const param = PARAM_OF[cur.kind];
+    f.elements.dose.value = String(cur.dose ?? '').replace('.', ',');
+    const du = cur.doseUnit || 'g';
+    $('#c-dose-l', el).textContent = cur.calc === 'fixe' ? `Dose (${du}/m³)` : `Dose (${du}/m³ pour ${nf(cur.step, 2)} ${param ? STEP_LABEL[param] : 'unité'})`;
+    $('#c-step', el).hidden = cur.calc !== 'step';
+    if (cur.calc === 'step') {
+      const pl = PARAMS[param] || { label: 'Valeur', d: 2 };
+      $('#c-cur-l', el).textContent = `${pl.label} mesuré${last[param] != null ? ' (dernier passage)' : ''}`;
+      f.elements.cur.value = last[param] != null ? String(last[param]).replace('.', ',') : '';
+      const t = st.th[param] && st.th[param].target; f.elements.tgt.value = t != null ? String(t).replace('.', ',') : '';
+    }
+    compute();
+  };
+  const compute = () => {
+    const V = L.num(f.elements.vol.value), dose = L.num(f.elements.dose.value);
+    let q = null, how = '';
+    if (cur.calc === 'fixe') { q = L.doseFixed(dose, V); how = `${nf(dose, 2)} ${cur.doseUnit || 'g'}/m³ × ${nf(V, 1)} m³`; }
+    else {
+      const c = L.num(f.elements.cur.value), t = L.num(f.elements.tgt.value);
+      const wrong = c != null && t != null && ((cur.kind === 'ph_minus' && c <= t) || (['ph_plus', 'tac_plus', 'stab', 'sel'].includes(cur.kind) && c >= t));
+      if (wrong) { $('#c-res', el).innerHTML = `<span>La valeur mesurée est déjà ${cur.kind === 'ph_minus' ? 'sous' : 'au-dessus de'} la cible : pas de ${esc(cur.name)} à ajouter.</span>`; return; }
+      q = L.doseStep(dose, +cur.step, c, t, V);
+      how = c != null && t != null ? `${nf(Math.abs(t - c), 2)} ÷ ${nf(cur.step, 2)} × ${nf(dose, 2)} ${cur.doseUnit || 'g'}/m³ × ${nf(V, 1)} m³` : '';
+    }
+    const pk = L.packsFor(cur, q);
+    $('#c-res', el).innerHTML = q == null ? '<span>Renseigne les valeurs pour obtenir la dose.</span>' : `<span>${esc(cur.name)} à ajouter</span><b>${L.fmtQty(q, cur.doseUnit || 'g')}</b><small>${esc(how)}${pk && pk.packs ? ` · soit ${esc(packPlural(pk.packs, cur))}` : ''}</small>`;
+    el.dataset.q = q ?? '';
+  };
+  const drain = () => {
+    const c = L.num(f.elements.cyaCur.value), t = L.num(f.elements.cyaTgt.value), V = L.num(f.elements.vol.value);
+    const pct = L.drainPct(c, t);
+    $('#c-drain', el).innerHTML = c == null || t == null ? '<span>Renseigne les deux valeurs.</span>' : pct <= 0 ? '<span>Pas de vidange nécessaire.</span>' : `<span>À vider puis remplir à l’eau neuve</span><b>${nf(pct * 100, 0)} %</b><small>${V ? `soit ≈ ${nf(pct * V, 1)} m³ sur ${nf(V, 1)} m³` : 'renseigne le volume pour avoir les m³'}</small>`;
+  };
+  loadProd(); drain();
+  el.addEventListener('input', e => { if (e.target.name === 'prod') loadProd(); else if (['cyaCur', 'cyaTgt'].includes(e.target.name)) drain(); else { compute(); if (e.target.name === 'vol') drain(); } });
+  el.addEventListener('click', async e => {
+    const b = e.target.closest('[data-v]'); if (!b) return;
+    if (b.dataset.v === 'need') {
+      const q = L.num(el.dataset.q); const pk = L.packsFor(cur, q);
+      await run(put('needs', uid(), { poolId, productId: cur.id, name: cur.name, qty: (pk && pk.packs) || 1, unit: packName(cur), note: q != null ? `Dose calculée : ${L.fmtQty(q, cur.doseUnit || 'g')}` : '', status: 'open', createdAt: Date.now() }), 'Ajouté aux besoins produits');
+    } else if (b.dataset.v === 'save-dose') {
+      const d = L.num(f.elements.dose.value); if (d == null) return;
+      await run(upd('products', cur.id, { dose: d }), `Dose enregistrée pour ${cur.name}`);
+    }
+  });
+}
+
+/* ========== BESOINS ========== */
+function viewNeeds() {
+  const open = openNeeds();
+  const groups = {};
+  open.forEach(n => { const k = n.productId || 'x:' + (n.name || ''); (groups[k] = groups[k] || []).push(n); });
+  const keys = Object.keys(groups).sort((a, b) => (groups[a][0].name || '').localeCompare(groups[b][0].name || '', 'fr'));
+  const since = L.addDays(today(), -14);
+  const bought = Object.values(S.needs).filter(n => n.status === 'bought' && (n.boughtAt || '') >= since).sort((a, b) => (b.boughtAt || '').localeCompare(a.boughtAt || ''));
+  let h = `<div class="toolbar" style="justify-content:space-between"><div><h1>Besoins produits</h1><p class="muted">${open.length ? `${open.length} besoin${open.length > 1 ? 's' : ''} en attente, regroupé${open.length > 1 ? 's' : ''} par produit pour ton passage au magasin.` : 'Rien à acheter pour le moment.'}</p></div><button class="btn primary" data-action="add-need">+ Ajouter un besoin</button></div>`;
+  if (!open.length && !bought.length) h += `<div class="empty-state"><h2>Liste de courses vide</h2><p>Les besoins s’ajoutent pendant la validation d’un passage, depuis la calculatrice d’une fiche, ou ici. Quand tu achètes un produit, valide l’achat sur la ligne du client : il part directement dans sa facturation du mois.</p></div>`;
+  keys.forEach(k => {
+    const g = groups[k], unit = g[0].unit || '';
+    const total = g.reduce((a, n) => a + (+n.qty || 0), 0);
+    h += `<section class="need-group"><div class="need-head"><strong>${esc(g[0].name || 'Produit')}</strong><span class="num">${nf(total, 2)} × ${esc(unit)} au total</span></div>
+      ${g.map(n => { const p = S.pools[n.poolId]; return `<div class="need-row"><div class="nb"><b>${esc(p ? p.name : 'Client inconnu')}</b><span class="muted sm">${nf(n.qty, 2)} × ${esc(n.unit || '')}${n.note ? ' · ' + esc(n.note) : ''}</span></div><button class="btn sm primary" data-action="need-buy" data-id="${n.id}">Acheté</button><button class="btn sm ghost danger" data-action="need-del" data-id="${n.id}">Supprimer</button></div>`; }).join('')}
+    </section>`;
+  });
+  if (bought.length) h += `<section class="card"><h2>Achetés ces 14 derniers jours</h2><div class="hlist">${bought.map(n => { const p = S.pools[n.poolId]; return `<div class="need-row" style="border-top:0;padding-top:0"><div class="nb"><b>${esc(n.name)}</b><span class="muted sm">${esc(p ? p.name : '')} · ${nf(n.qty, 2)} × ${esc(n.unit || '')} · ${n.boughtAt ? shortDate(n.boughtAt) : ''}</span></div><span class="badge ok">Facturé</span></div>`; }).join('')}</div></section>`;
+  return h;
+}
+function openAddNeed() {
+  const pl = pools(), pr = products();
+  if (!pl.length || !pr.length) { toast(!pl.length ? 'Crée d’abord une fiche piscine.' : 'Ajoute d’abord un produit dans Réglages.', true); return; }
+  const el = openSheet({
+    title: 'Ajouter un besoin',
+    html: `<form class="form" id="nform" novalidate>
+      <label class="f"><span>Client</span><select name="poolId">${pl.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></label>
+      <label class="f"><span>Produit</span><select name="productId">${pr.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></label>
+      <div class="f"><span>Quantité à acheter <small>(<span id="n-unit">conditionnement</span>)</small></span>${stepper({ attr: 'name="qty"', value: 1, min: 1, max: 20, slider: true, label: 'Nombre de conditionnements' })}</div>
+      <label class="f"><span>Note <small>(facultatif)</small></span><input name="note"></label>
+    </form>`,
+    foot: `<button class="btn primary" data-v="save">Ajouter</button>`
+  });
+  const f = $('#nform', el);
+  const u = () => { const p = S.products[f.elements.productId.value]; $('#n-unit', el).textContent = packName(p); };
+  u(); f.addEventListener('input', u);
+  el.addEventListener('click', async e => {
+    if (!e.target.closest('[data-v="save"]')) return;
+    const qty = Math.max(1, Math.round(+f.elements.qty.value || 1));
+    const p = S.products[f.elements.productId.value];
+    closeSheet();
+    await run(put('needs', uid(), { poolId: f.elements.poolId.value, productId: p.id, name: p.name, qty, unit: packName(p), note: f.elements.note.value.trim(), status: 'open', createdAt: Date.now() }), 'Besoin ajouté');
+  });
+}
+function openBuy(needId) {
+  const n = S.needs[needId]; if (!n) return;
+  const p = S.pools[n.poolId], pr = S.products[n.productId];
+  const el = openSheet({
+    title: 'Valider l’achat',
+    html: `<form class="form" id="bform" novalidate>
+      <p><b>${esc(n.name)}</b> pour <b>${esc(p ? p.name : 'client inconnu')}</b></p>
+      <div class="f"><span>Quantité achetée <small>(${esc(pr ? packName(pr) : (n.unit || 'conditionnement'))})</small></span>${stepper({ attr: 'name="qty"', value: Math.max(1, Math.round(+n.qty || 1)), min: 1, max: 20, slider: true, label: 'Nombre de conditionnements achetés' })}</div>
+      <div class="grid2"><label class="f" data-req="price"><span>Prix de vente par ${esc(pr ? packName(pr) : 'conditionnement')} (€)</span><input name="price" inputmode="decimal" value="${esc(pr && pr.price != null ? String(pr.price).replace('.', ',') : '')}"></label>
+      <label class="f"><span>Date d’achat</span><input type="date" name="date" value="${today()}"></label></div>
+      <div class="result" id="b-total"></div>
+      <p class="hint">La ligne est ajoutée à la facturation de ${esc(p ? p.name : 'ce client')} pour le mois de l’achat.</p>
+    </form>`,
+    foot: `<button class="btn primary" data-v="save">Valider l’achat et facturer</button>`
+  });
+  const f = $('#bform', el);
+  const tot = () => { const q = L.num(f.elements.qty.value), pu = L.num(f.elements.price.value); $('#b-total', el).innerHTML = q != null && pu != null ? `<span>À facturer à ${esc(p ? p.name : 'ce client')}</span><b>${eur(q * pu)}</b><small>${nf(q, 0)} × ${eur(pu)}</small>` : '<span>Renseigne le prix de vente.</span>'; };
+  tot(); f.addEventListener('input', tot);
+  el.addEventListener('click', async e => {
+    if (!e.target.closest('[data-v="save"]')) return;
+    const qty = Math.max(1, Math.round(+f.elements.qty.value || 1)), price = L.num(f.elements.price.value), date = f.elements.date.value || today();
+    if (price == null) { f.querySelector('[data-req="price"]').classList.add('missing'); return; }
+    const lid = uid();
+    closeSheet();
+    const ops = [
+      put('lines', lid, { poolId: n.poolId, month: L.ym(date), date, kind: 'produit', source: 'achat', refId: needId, label: n.name, qty, unit: pr ? packName(pr) : (n.unit || ''), unitPrice: price }),
+      upd('needs', needId, { status: 'bought', boughtAt: date, lineId: lid, qty })
+    ];
+    if (pr && (pr.price == null || pr.price === '')) ops.push(upd('products', pr.id, { price }));
+    await run(ops, 'Achat enregistré sur la facturation du client');
+  });
+}
+
+/* ========== FACTURATION ========== */
+const loadedMonths = new Set();
+function ensureMonth(m) {
+  if (m >= LINES_FROM || loadedMonths.has(m) || !db) return;
+  loadedMonths.add(m);
+  db.collection('lines').where('month', '==', m).get().then(snap => { snap.docs.forEach(d => { S.extraLines[d.id] = { id: d.id, ...d.data() }; }); schedule(); }).catch(() => { loadedMonths.delete(m); });
+}
+function viewBilling() {
+  const m = UI.billMonth, st = settings();
+  ensureMonth(m);
+  const lines = monthLines(m);
+  const total = lines.reduce((a, l) => a + (+l.qty || 0) * (+l.unitPrice || 0), 0);
+  const prodTotal = lines.filter(l => l.kind === 'produit').reduce((a, l) => a + (+l.qty || 0) * (+l.unitPrice || 0), 0);
+  const nPass = lines.filter(l => l.kind === 'passage').length, nPonct = lines.filter(l => l.kind === 'ponctuel').length;
+  const by = {}; lines.forEach(l => { (by[l.poolId] = by[l.poolId] || []).push(l); });
+  const ids = Object.keys(by).sort((a, b) => ((S.pools[a] || {}).name || '').localeCompare((S.pools[b] || {}).name || '', 'fr'));
+  let h = `<div class="weekbar"><div class="monthnav"><button class="icon-btn" data-action="bill-month" data-delta="-1" aria-label="Mois précédent">${ICON.left}</button><strong>${monthLabel(m)}</strong><button class="icon-btn" data-action="bill-month" data-delta="1" aria-label="Mois suivant">${ICON.right}</button></div>
+    <div class="weekactions"><button class="btn sm ghost" data-action="add-line">+ Ligne manuelle</button><button class="btn sm primary" data-action="export-csv" ${lines.length ? '' : 'disabled'}>Exporter en CSV</button></div></div>`;
+  h += `<div class="tiles">
+    <div class="tile"><span>Total du mois</span><b>${eur(total)}</b></div>
+    <div class="tile"><span>Passages</span><b>${nPass}${nPonct ? ` <small class="muted">+ ${nPonct} ponct.</small>` : ''}</b></div>
+    <div class="tile"><span>Dont produits</span><b>${eur(prodTotal)}</b></div></div>
+    <p class="hint">Montants sans TVA (franchise en base). Sur tes factures : « TVA non applicable, art. 293 B du CGI ».</p>`;
+  if (!lines.length) { h += `<div class="empty-state"><h2>Rien à facturer en ${monthLabel(m)}</h2><p>Chaque passage validé depuis le planning crée une ligne ici, au prix de la fiche. Les produits facturés et les achats validés dans Besoins s’ajoutent au client concerné.</p></div>`; return h; }
+  ids.forEach(pid => {
+    const ls = by[pid].sort((a, b) => (a.date || '').localeCompare(b.date || '')), p = S.pools[pid];
+    const sum = ls.reduce((a, l) => a + (+l.qty || 0) * (+l.unitPrice || 0), 0);
+    const inv = S.invoiced[`${pid}_${m}`], open = UI.openBill[pid];
+    const np = ls.filter(l => l.kind === 'passage').length, npo = ls.filter(l => l.kind === 'ponctuel').length, npr = ls.filter(l => l.kind === 'produit').length;
+    h += `<section class="bclient"><button data-action="bill-toggle" data-id="${pid}" aria-expanded="${open ? 'true' : 'false'}"><span class="bt"><strong>${esc(p ? p.name : 'Client archivé')}</strong><span class="muted sm">${[np ? `${np} passage${np > 1 ? 's' : ''}` : '', npo ? `${npo} ponctuel${npo > 1 ? 's' : ''}` : '', npr ? `${npr} produit${npr > 1 ? 's' : ''}` : ''].filter(Boolean).join(' · ')}</span></span><span style="display:grid;justify-items:end;gap:4px"><span class="bsum">${eur(sum)}</span>${inv ? '<span class="badge ok">Facturé</span>' : '<span class="badge">À facturer</span>'}</span></button>
+      ${open ? `<div class="bdetail"><div class="tablewrap"><table><thead><tr><th>Date</th><th>Libellé</th><th class="r">Qté</th><th class="r">PU</th><th class="r">Total</th><th></th></tr></thead><tbody>
+        ${ls.map(l => `<tr><td>${l.date ? shortDate(l.date) : ''}</td><td>${esc(l.label)}${l.source === 'achat' ? ' <small class="muted">(achat)</small>' : ''}</td><td class="r">${nf(l.qty, 2)}${l.unit ? ' × ' + esc(l.unit) : ''}</td><td class="r">${eur(l.unitPrice)}</td><td class="r">${eur((+l.qty || 0) * (+l.unitPrice || 0))}</td><td class="r"><button class="icon-btn" data-action="line-del" data-id="${l.id}" aria-label="Supprimer la ligne">${ICON.x}</button></td></tr>`).join('')}
+      </tbody></table></div>
+      <div class="row-actions"><button class="btn sm ${inv ? 'ghost' : 'primary'}" data-action="bill-invoiced" data-id="${pid}">${inv ? 'Marquer non facturé' : 'Marquer comme facturé'}</button><button class="btn sm ghost" data-action="add-line" data-pool="${pid}">+ Ligne</button></div></div>` : ''}
+    </section>`;
+  });
+  return h;
+}
+function openAddLine(poolId) {
+  const pl = pools(); if (!pl.length) { toast('Crée d’abord une fiche piscine.', true); return; }
+  const m = UI.billMonth, d = m === L.ym(today()) ? today() : m + '-01';
+  const el = openSheet({
+    title: 'Ajouter une ligne',
+    html: `<form class="form" id="lform" novalidate>
+      <label class="f"><span>Client</span><select name="poolId">${pl.map(p => `<option value="${p.id}" ${p.id === poolId ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label>
+      <label class="f" data-req="label"><span>Libellé</span><input name="label" placeholder="Ex. : remplacement joint, déplacement"></label>
+      <div class="grid3"><label class="f" data-req="qty"><span>Quantité</span><input name="qty" inputmode="decimal" value="1"></label><label class="f" data-req="price"><span>Prix unitaire (${priceLabel()})</span><input name="price" inputmode="decimal"></label><label class="f"><span>Date</span><input type="date" name="date" value="${d}"></label></div>
+    </form>`,
+    foot: `<button class="btn primary" data-v="save">Ajouter</button>`
+  });
+  const f = $('#lform', el);
+  el.addEventListener('click', async e => {
+    if (!e.target.closest('[data-v="save"]')) return;
+    const label = f.elements.label.value.trim(), qty = L.num(f.elements.qty.value), price = L.num(f.elements.price.value), date = f.elements.date.value || d;
+    let bad = false;
+    if (!label) { f.querySelector('[data-req="label"]').classList.add('missing'); bad = true; }
+    if (qty == null) { f.querySelector('[data-req="qty"]').classList.add('missing'); bad = true; }
+    if (price == null) { f.querySelector('[data-req="price"]').classList.add('missing'); bad = true; }
+    if (bad) return;
+    closeSheet();
+    await run(put('lines', uid(), { poolId: f.elements.poolId.value, month: L.ym(date), date, kind: 'autre', source: 'manuel', label, qty, unit: '', unitPrice: price }), 'Ligne ajoutée');
+  });
+}
+async function exportCsv() {
+  const m = UI.billMonth, st = settings();
+  const lines = monthLines(m).sort((a, b) => ((S.pools[a.poolId] || {}).name || '').localeCompare((S.pools[b.poolId] || {}).name || '', 'fr') || (a.date || '').localeCompare(b.date || ''));
+  const n2 = v => (+v || 0).toFixed(2).replace('.', ',');
+  const rows = [['Client', 'Adresse', 'Date', 'Type', 'Libellé', 'Quantité', 'Unité', 'Prix unitaire', 'Total']];
+  lines.forEach(l => { const p = S.pools[l.poolId] || {}; rows.push([p.name || '', p.address || '', l.date ? dateFr(l.date) : '', { passage: 'Entretien', ponctuel: 'Ponctuel', produit: 'Produit', autre: 'Autre' }[l.kind] || l.kind, l.label, n2(l.qty).replace(',00', ''), l.unit || '', n2(l.unitPrice), n2((+l.qty || 0) * (+l.unitPrice || 0))]); });
+  if (!downloads) { toast('Téléchargement indisponible dans cette vue.', true); return; }
+  try { await downloads.save({ filename: `facturation-${m}.csv`, data: L.csv(rows) }); toast('Export enregistré'); }
+  catch (e) { if (!e || e.code !== 'declined') toast('Export impossible : ' + ((e && (e.message || e.code)) || 'erreur'), true); }
+}
+
+/* ========== RÉGLAGES ========== */
+const LIFE_LABEL = { sable: 'Sable', verre: 'Verre filtrant', cellule: 'Cellule électrolyseur', cartouche: 'Cartouche', sonde: 'Sonde pH / redox' };
+function viewSettings() {
+  const st = settings(), th = st.th;
+  const fact = (k, v) => `<div><dt>${k}</dt><dd>${v || '<span class="muted">–</span>'}</dd></div>`;
+  const mn = m => MONTHS[m - 1];
+  const rg = (k, d) => `${nf(th[k].min, d)} – ${nf(th[k].max, d)} <small class="muted">(alerte &lt; ${nf(th[k].alertMin, d)} ou &gt; ${nf(th[k].alertMax, d)})</small>`;
+  const pr = products();
+  const dose = x => x.calc === 'step' ? `${nf(x.dose, 2)} ${esc(x.doseUnit || 'g')}/m³ pour ${nf(x.step, 2)} ${PARAM_OF[x.kind] ? STEP_LABEL[PARAM_OF[x.kind]] : ''}` : x.calc === 'fixe' ? `${nf(x.dose, 2)} ${esc(x.doseUnit || 'g')}/m³ (dose fixe)` : 'Sans calcul de dose';
+  return `<h1>Réglages</h1>
+  <div class="fiche-grid">
+    <section class="card"><div class="card-head"><h2>Tournée</h2><button class="btn sm ghost" data-action="edit-settings" data-sec="tour">Modifier</button></div><dl class="facts">
+      ${fact('Point de départ', esc(st.startAddress) || (st.startGps ? '' : '<span style="color:var(--warn)">à renseigner</span>'))}${fact('GPS du départ', st.startGps ? esc(gpsText(st.startGps)) : '<span style="color:var(--warn)">à renseigner</span>')}${fact('Heure de départ', esc(st.startTime))}${fact('Jours de tournée', (st.workDays || []).map(d => DOW[d]).join(', '))}
+    </dl></section>
+    <section class="card"><div class="card-head"><h2>Estimation des trajets</h2><button class="btn sm ghost" data-action="edit-settings" data-sec="road">Modifier</button></div><dl class="facts">
+      ${fact('Circulation chargée', (st.peakMonths || []).map(mn).join(', ') || 'aucun mois')}${fact('Vitesse moyenne', `${nf(st.speedOff, 0)} km/h, ${nf(st.speedPeak, 0)} km/h en période chargée`)}${fact('Détour route / vol d’oiseau', '× ' + nf(st.detour, 2))}${fact('Temps fixe par arrêt', st.stopOverhead + ' min')}
+    </dl><p class="hint">Estimation hors trafic réel : distance à vol d’oiseau × détour, à la vitesse moyenne du mois. Chaque trajet du planning a un lien « Plans » qui ouvre l’itinéraire avec le trafic en direct.</p></section>
+    <section class="card"><div class="card-head"><h2>Seuils des constantes</h2><button class="btn sm ghost" data-action="edit-settings" data-sec="th">Modifier</button></div><dl class="facts">
+      ${fact('pH', rg('ph', 1) + ` · cible ${nf(th.ph.target, 1)}`)}${fact('Chlore libre (ppm)', rg('cl', 1))}${fact('TAC (ppm)', rg('tac', 0) + ` · cible ${th.tac.target}`)}${fact('Stabilisant (ppm)', rg('cya', 0) + ` · cible ${th.cya.target}`)}${fact('Redox (mV)', rg('redox', 0))}${fact('Sel (g/L)', rg('sel', 1) + ` · cible ${nf(th.sel.target, 1)}`)}
+    </dl></section>
+    <section class="card"><div class="card-head"><h2>Durées de vie du matériel</h2><button class="btn sm ghost" data-action="edit-settings" data-sec="equip">Modifier</button></div><dl class="facts">
+      ${Object.entries(st.equipLife).map(([k, v]) => fact(LIFE_LABEL[k] || k, v ? `${v} mois` : '')).join('')}
+    </dl></section>
+  </div>
+  <section class="card"><div class="card-head"><h2>Sauvegarde</h2><button class="btn sm primary" data-action="backup">Sauvegarder ou restaurer</button></div><dl class="facts">
+      <div><dt>Dernière sauvegarde</dt><dd>${backupAge()}</dd></div><div><dt>Espace utilisé</dt><dd>${S.usage != null ? fmtBytes(S.usage) : '–'}</dd></div><div><dt>Stockage protégé</dt><dd>${S.persisted ? 'Oui' : 'Non demandé ou refusé'}</dd></div><div><dt>Version</dt><dd>${APP_VERSION}</dd></div>
+    </dl><p class="hint">Les données sont enregistrées dans ce téléphone, sans compte ni serveur. Elles ne se synchronisent pas avec un autre appareil : pour passer sur un autre téléphone ou ton Mac, restaure une sauvegarde.</p></section>
+  <section class="card"><div class="card-head"><h2>Catalogue produits</h2><button class="btn sm primary" data-action="product" data-id="">+ Nouveau produit</button></div>
+    <p class="hint">La dose sert à la calculatrice et aux corrections suggérées. Le conditionnement et son prix servent aux besoins et à la facturation.</p>
+    ${pr.length ? `<div class="prodlist">${pr.map(x => `<button class="prodrow" data-action="product" data-id="${x.id}"><span><b>${esc(x.name)}</b><br><span class="muted sm">${dose(x)}</span></span><span>${x.pack ? esc(x.pack) : '<span class="badge warn">Conditionnement à définir</span>'} · ${x.price != null && x.price !== '' ? eur(x.price) : '<span class="badge warn">Prix à renseigner</span>'}</span></button>`).join('')}</div>` : '<p class="muted">Aucun produit. Ajoute au moins pH moins, pH plus, TAC + et chlore choc pour les corrections automatiques.</p>'}
+  </section>`;
+}
+async function saveSettings(patch) { const next = merge(settings(), patch); return run(db.doc('settings/main').set(strip(next)), 'Réglages enregistrés'); }
+function openSettings(sec) {
+  const st = settings(), th = st.th;
+  const val = v => esc(String(v ?? '').replace('.', ','));
+  let title = '', html = '';
+  if (sec === 'tour') {
+    title = 'Tournée';
+    html = `<label class="f"><span>Adresse de départ</span><input name="startAddress" value="${esc(st.startAddress)}"></label>
+      <label class="f" data-req="gps"><span>GPS du départ</span><input name="startGps" value="${esc(gpsText(st.startGps))}" placeholder="43.27268, 6.58012"><small>Point d’où partent et où reviennent tes tournées. Dans Plans : appui long sur le lieu, puis copie les coordonnées.</small></label>
+      <label class="f"><span>Heure de départ</span><input type="time" name="startTime" value="${esc(st.startTime)}"></label>
+      <div class="f"><span>Jours de tournée</span><div class="daypick">${[1, 2, 3, 4, 5, 6, 7].map(d => `<label><input type="checkbox" name="workDays" value="${d}" ${(st.workDays || []).map(Number).includes(d) ? 'checked' : ''}><span>${DOW[d]}</span></label>`).join('')}</div></div>`;
+  } else if (sec === 'road') {
+    title = 'Estimation des trajets';
+    html = `<div class="f"><span>Mois de circulation chargée</span><div class="daypick">${MONTHS_S.map((m, i) => `<label><input type="checkbox" name="peak" value="${i + 1}" ${(st.peakMonths || []).map(Number).includes(i + 1) ? 'checked' : ''}><span style="min-width:58px">${m}</span></label>`).join('')}</div></div>
+      <div class="grid2"><label class="f"><span>Vitesse moyenne (km/h)</span><input name="speedOff" inputmode="decimal" value="${val(st.speedOff)}"></label><label class="f"><span>Vitesse en période chargée (km/h)</span><input name="speedPeak" inputmode="decimal" value="${val(st.speedPeak)}"></label></div>
+      <div class="grid2"><label class="f"><span>Coefficient de détour</span><input name="detour" inputmode="decimal" value="${val(st.detour)}"><small>Distance par la route ÷ distance à vol d’oiseau. 1,3 à 1,5 dans le Golfe.</small></label><label class="f"><span>Temps fixe par arrêt (min)</span><input name="stopOverhead" inputmode="numeric" value="${val(st.stopOverhead)}"><small>Stationnement, portail, accès au local.</small></label></div>`;
+  } else if (sec === 'th') {
+    title = 'Seuils des constantes';
+    const row = (k, label, target) => `<fieldset><legend>${label}</legend><div class="grid3">
+      <label class="f"><span>Mini idéal</span><input name="${k}.min" inputmode="decimal" value="${val(th[k].min)}"></label><label class="f"><span>Maxi idéal</span><input name="${k}.max" inputmode="decimal" value="${val(th[k].max)}"></label>
+      <label class="f"><span>Alerte sous</span><input name="${k}.alertMin" inputmode="decimal" value="${val(th[k].alertMin)}"></label><label class="f"><span>Alerte au-dessus</span><input name="${k}.alertMax" inputmode="decimal" value="${val(th[k].alertMax)}"></label>
+      ${target ? `<label class="f"><span>Cible des corrections</span><input name="${k}.target" inputmode="decimal" value="${val(th[k].target)}"></label>` : ''}</div></fieldset>`;
+    html = row('ph', 'pH', true) + row('cl', 'Chlore libre (ppm)') + row('tac', 'TAC (ppm)', true) + row('cya', 'Stabilisant (ppm)', true) + row('redox', 'Redox (mV)') + row('sel', 'Sel (g/L)', true);
+  } else if (sec === 'equip') {
+    title = 'Durées de vie du matériel';
+    html = `<p class="hint">Valeurs par défaut, en mois, quand la fiche ne précise pas de durée.</p><div class="grid3">${Object.entries(st.equipLife).map(([k, v]) => `<label class="f"><span>${LIFE_LABEL[k] || k}</span><input name="life.${k}" inputmode="numeric" value="${val(v)}"></label>`).join('')}</div>`;
+  }
+  const el = openSheet({ title, html: `<form class="form" id="sform" novalidate>${html}<div id="serr" class="errors" hidden></div></form>`, foot: `<button class="btn primary" data-v="save">Enregistrer</button>` });
+  const f = $('#sform', el);
+  el.addEventListener('click', async e => {
+    if (!e.target.closest('[data-v="save"]')) return;
+    const n = name => L.num(f.elements[name].value);
+    let patch = {}, err = '';
+    if (sec === 'tour') {
+      const raw = f.elements.startGps.value.trim(), g = L.parseGps(raw);
+      if (raw && !g) err = 'Coordonnées GPS non reconnues. Exemple : 43.27268, 6.58012';
+      patch = { startAddress: f.elements.startAddress.value.trim(), startGps: g || null, startTime: f.elements.startTime.value || '08:00', workDays: $$('[name="workDays"]:checked', f).map(i => +i.value) };
+    } else if (sec === 'road') {
+      patch = { peakMonths: $$('[name="peak"]:checked', f).map(i => +i.value), speedOff: n('speedOff') || 40, speedPeak: n('speedPeak') || 22, detour: n('detour') || 1.35, stopOverhead: n('stopOverhead') ?? 3 };
+    } else if (sec === 'th') {
+      const t = {};
+      ['ph', 'cl', 'tac', 'cya', 'redox', 'sel'].forEach(k => { t[k] = {}; ['min', 'max', 'alertMin', 'alertMax', 'target'].forEach(x => { const elx = f.elements[`${k}.${x}`]; if (elx) { const v = L.num(elx.value); if (v == null) err = 'Tous les seuils doivent être des nombres.'; t[k][x] = v; } }); if (t[k].min > t[k].max) err = `Seuil ${PARAMS[k].label} : le mini dépasse le maxi.`; });
+      patch = { th: t };
+    } else if (sec === 'equip') {
+      const life = {}; Object.keys(st.equipLife).forEach(k => { life[k] = n('life.' + k); });
+      patch = { equipLife: life };
+    }
+    if (err) { const b = $('#serr', el); b.hidden = false; b.textContent = err; return; }
+    const ok = await saveSettings(patch); if (ok) closeSheet();
+  });
+}
+function openProduct(id) {
+  const p = id ? clone(S.products[id]) : { name: '', kind: 'autre', calc: 'none', dose: '', doseUnit: 'g', step: '', pack: '', packSize: '', packUnit: 'kg', price: '' };
+  const kindOpts = Object.entries(PKIND).map(([k, v]) => `<option value="${k}" ${k === p.kind ? 'selected' : ''}>${v}</option>`).join('');
+  const val = v => esc(String(v ?? '').replace('.', ','));
+  const el = openSheet({
+    title: id ? p.name : 'Nouveau produit',
+    html: `<form class="form" id="prform" novalidate>
+      <label class="f" data-req="name"><span>Nom</span><input name="name" value="${esc(p.name)}" placeholder="Ex. : pH moins micro-billes"></label>
+      <fieldset><legend>Conditionnement et prix</legend>
+        <div class="grid2"><label class="f" data-req="pack"><span>Conditionnement</span><input name="pack" value="${esc(p.pack || '')}" placeholder="Seau 5 kg, bidon 20 L, sac 25 kg…"></label><label class="f" data-req="price"><span>Prix de vente du conditionnement (€)</span><input name="price" inputmode="decimal" value="${val(p.price)}"></label></div>
+        <div class="grid2"><label class="f"><span>Contenance</span><input name="packSize" inputmode="decimal" value="${val(p.packSize)}" placeholder="5"></label><label class="f"><span>Unité de contenance</span><select name="packUnit">${PACK_UNITS.map(u => `<option ${u === (p.packUnit || 'kg') ? 'selected' : ''}>${u}</option>`).join('')}</select></label></div>
+        <p class="hint">La contenance permet de convertir une dose calculée en nombre de conditionnements à acheter.</p>
+      </fieldset>
+      <fieldset><legend>Dosage</legend>
+        <div class="grid2"><label class="f"><span>Rôle</span><select name="kind">${kindOpts}</select><small>Sert à proposer le bon produit quand une constante sort de la plage.</small></label>
+        <label class="f"><span>Calcul de dose</span><select name="calc"><option value="none" ${p.calc === 'none' ? 'selected' : ''}>Pas de calcul</option><option value="step" ${p.calc === 'step' ? 'selected' : ''}>Par palier (pH, TAC, stabilisant, sel)</option><option value="fixe" ${p.calc === 'fixe' ? 'selected' : ''}>Dose fixe par m³ (traitement choc)</option></select></label></div>
+        <div class="grid3" id="pr-dose"><label class="f"><span>Dose</span><input name="dose" inputmode="decimal" value="${val(p.dose)}"></label><label class="f"><span>Unité de dose</span><select name="doseUnit">${['g', 'ml', 'kg'].map(u => `<option ${u === (p.doseUnit || 'g') ? 'selected' : ''}>${u}</option>`).join('')}</select></label><label class="f" id="pr-step"><span>Palier</span><input name="step" inputmode="decimal" value="${val(p.step)}"><small id="pr-step-h"></small></label></div>
+        <p class="hint" id="pr-explain"></p>
+      </fieldset>
+      ${id ? `<button type="button" class="btn ghost danger" data-v="delete" style="justify-self:start">Supprimer ce produit</button>` : ''}
+    </form>`,
+    foot: `<button class="btn primary" data-v="save">Enregistrer</button>`
+  });
+  const f = $('#prform', el);
+  const refresh = () => {
+    const calc = f.elements.calc.value, kind = f.elements.kind.value, param = PARAM_OF[kind];
+    $('#pr-dose', el).hidden = calc === 'none'; $('#pr-step', el).hidden = calc !== 'step';
+    $('#pr-step-h', el).textContent = param ? STEP_LABEL[param] : '';
+    const d = f.elements.dose.value || '?', u = f.elements.doseUnit.value, s = f.elements.step.value || '?';
+    $('#pr-explain', el).textContent = calc === 'step' ? `Lecture : ${d} ${u} par m³ font varier de ${s} ${param ? STEP_LABEL[param] : 'unité'}.` : calc === 'fixe' ? `Lecture : ${d} ${u} par m³ à chaque traitement.` : '';
+  };
+  refresh(); f.addEventListener('input', refresh);
+  el.addEventListener('click', async e => {
+    const b = e.target.closest('[data-v]'); if (!b) return;
+    if (b.dataset.v === 'delete') { if (!armed(b, 'Confirmer la suppression')) return; closeSheet(); await run(del('products', id), 'Produit supprimé'); return; }
+    if (b.dataset.v !== 'save') return;
+    const name = f.elements.name.value.trim(); if (!name) { f.querySelector('[data-req="name"]').classList.add('missing'); return; }
+    const doc = { name, kind: f.elements.kind.value, calc: f.elements.calc.value, dose: L.num(f.elements.dose.value), doseUnit: f.elements.doseUnit.value, step: L.num(f.elements.step.value), pack: f.elements.pack.value.trim(), packSize: L.num(f.elements.packSize.value), packUnit: f.elements.packUnit.value, price: L.num(f.elements.price.value) };
+    if (doc.calc === 'step' && (!doc.dose || !doc.step)) { toast('Renseigne la dose et le palier.', true); return; }
+    if (doc.calc === 'fixe' && !doc.dose) { toast('Renseigne la dose.', true); return; }
+    closeSheet();
+    await run(put('products', id || uid(), doc), 'Produit enregistré');
+  });
+}
+
+/* ---------- Actions globales ---------- */
+const ACTIONS = {
+  week: b => { UI.week = L.addDays(UI.week, +b.dataset.delta); UI.day = L.weekDays(UI.week).includes(today()) ? today() : UI.week; render(); },
+  'week-today': () => { UI.week = L.mondayOf(today()); UI.day = today(); render(); },
+  'pick-day': b => { UI.day = b.dataset.date; render(); },
+  'fill-week': () => fillWeek(),
+  optimize: b => optimizeDay(b.dataset.date),
+  'add-stop': b => openAddStop(b.dataset.date),
+  stop: b => openStop(b.dataset.id),
+  pool: b => { UI.poolId = b.dataset.id; render(); window.scrollTo(0, 0); },
+  'new-pool': () => openPoolForm(null),
+  'edit-pool': b => openPoolForm(b.dataset.id),
+  'back-pools': () => { UI.poolId = null; render(); },
+  calc: b => openCalc(b.dataset.id),
+  visit: b => openVisit(b.dataset.id),
+  copy: b => copy(b.dataset.text),
+  'pool-visit': b => {
+    const pid = b.dataset.id, t = today();
+    const ex = dayStops(t).find(s => s.poolId === pid && s.status !== 'fait');
+    if (ex) { openValidation(ex.id); return; }
+    const list = dayStops(t), id = uid();
+    const stop = { poolId: pid, date: t, type: 'entretien', priority: false, status: 'prevu', order: list.length ? Math.max(...list.map(s => s.order ?? 0)) + 1 : 0, createdAt: Date.now() };
+    S.stops[id] = { id, ...stop };
+    put('stops', id, stop).catch(e => toast(errMsg(e), true));
+    openValidation(id);
+  },
+  'archive-pool': async b => {
+    if (!armed(b, 'Confirmer l’archivage')) return;
+    const id = b.dataset.id, fut = Object.values(S.stops).filter(s => s.poolId === id && s.status !== 'fait' && s.date >= today());
+    const ok = await run([upd('pools', id, { active: false }), ...fut.map(s => del('stops', s.id))], `Fiche archivée${fut.length ? `, ${fut.length} passage${fut.length > 1 ? 's' : ''} à venir retiré${fut.length > 1 ? 's' : ''}` : ''}`);
+    if (ok) { UI.poolId = null; render(); }
+  },
+  'add-need': () => openAddNeed(),
+  'need-buy': b => openBuy(b.dataset.id),
+  'need-del': async b => { if (!armed(b, 'Confirmer')) return; await run(del('needs', b.dataset.id), 'Besoin supprimé'); },
+  'bill-month': b => { UI.billMonth = L.addMonths(UI.billMonth, +b.dataset.delta); render(); },
+  'bill-toggle': b => { UI.openBill[b.dataset.id] = !UI.openBill[b.dataset.id]; render(); },
+  'bill-invoiced': async b => { const k = `${b.dataset.id}_${UI.billMonth}`; await run(S.invoiced[k] ? del('invoiced', k) : put('invoiced', k, { at: new Date().toISOString() })); },
+  'line-del': async b => { if (!armed(b, 'Suppr.')) return; const id = b.dataset.id; if (S.extraLines[id]) delete S.extraLines[id]; await run(del('lines', id), 'Ligne supprimée'); },
+  'add-line': b => openAddLine(b.dataset.pool || null),
+  'export-csv': () => exportCsv(),
+  'edit-settings': b => openSettings(b.dataset.sec),
+  backup: () => openBackup(),
+  product: b => openProduct(b.dataset.id || null)
+};
+document.addEventListener('click', e => {
+  if (e.target.closest('#sheet-root')) return;
+  const tab = e.target.closest('[data-tab]');
+  if (tab) { setTab(tab.dataset.tab); return; }
+  const t = e.target.closest('[data-action]'); if (!t) return;
+  const fn = ACTIONS[t.dataset.action]; if (!fn) return;
+  if (!db && t.dataset.action !== 'copy') { toast('Stockage local indisponible.', true); return; }
+  fn(t, e);
+});
+
+boot();
+window.addEventListener('online', schedule); window.addEventListener('offline', schedule);
+if ('serviceWorker' in navigator && location.protocol !== 'file:') window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { }); });
+})();
+</script>
+</body>
+</html>
